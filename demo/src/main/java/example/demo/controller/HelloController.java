@@ -47,6 +47,7 @@ public class HelloController {
     @PostMapping("/users/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable Integer userId,
                                            @RequestBody UserRequest userRequest) {
+
         if (userId == null) {
             log.error("bad request");
             return ResponseEntity.badRequest().build();
