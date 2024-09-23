@@ -2,6 +2,8 @@ package example.demo.controller;
 
 import example.demo.model.User;
 import example.demo.model.UserRequest;
+import example.demo.model.UserResponseDto;
+import example.demo.service.ApiCallService;
 import example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,10 +19,17 @@ import java.util.Optional;
 @Slf4j
 public class HelloController {
     private final UserService userService;
+    private final ApiCallService apiCallService;
 
     @GetMapping("/hello")
     public String sayHello() {
         return "Hello Nusrat!";
+    }
+
+    @GetMapping("/test")
+    public ResponseEntity<UserResponseDto> paiTest() {
+        UserResponseDto userResponseDto = apiCallService.handleApiCall();
+        return ResponseEntity.ok(userResponseDto);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "/users")
