@@ -3,3 +3,8 @@ spring:
     name: demo
   profiles:
     active: test
+
+logging:
+  level:
+    org.springframework.jdbc.datasource: DEBUG
+    com.zaxxer.hikari: DEBUG  # For HikariCP
