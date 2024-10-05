@@ -2,9 +2,9 @@ spring:
   application:
     name: demo
   profiles:
-    active: test
+    active: local
 
 logging:
   level:
-    org.springframework.jdbc.datasource: DEBUG
-    com.zaxxer.hikari: DEBUG  # For HikariCP
+    org.springframework.jdbc.datasource: INFO
+    com.zaxxer.hikari: INFO  # For HikariCP
