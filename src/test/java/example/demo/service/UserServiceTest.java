@@ -1,6 +1,7 @@
 package example.demo.service;
 
 import example.demo.model.User;
+import example.demo.repository.UserRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

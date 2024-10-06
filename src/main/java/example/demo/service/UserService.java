@@ -2,11 +2,10 @@ package example.demo.service;
 
 import example.demo.model.User;
 import example.demo.model.UserRequest;
-import lombok.AllArgsConstructor;
+import example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 

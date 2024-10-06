@@ -1,10 +1,12 @@
 package example.demo.controller;
 
+import example.demo.config.Config;
 import example.demo.model.User;
 import example.demo.model.UserRequest;
 import example.demo.model.UserResponseDto;
 import example.demo.service.ApiCallService;
 import example.demo.service.UserService;
+import example.demo.service.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,10 +22,12 @@ import java.util.Optional;
 public class HelloController {
     private final UserService userService;
     private final ApiCallService apiCallService;
+    private final Config config;
 
     @GetMapping("/hello")
     public String sayHello() {
-        return "Hello Nusrat!";
+        Util util = config.getApplicationContext().getBean(Util.class);
+        return "Hello Nusrat! " + util.incrementAndGet();
     }
 
     @GetMapping("/test")

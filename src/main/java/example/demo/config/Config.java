@@ -1,19 +1,24 @@
 package example.demo.config;
 
+import example.demo.service.Util;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProvider;
-import org.springframework.security.oauth2.client.OAuth2AuthorizedClientProviderBuilder;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
-import org.springframework.security.oauth2.client.web.DefaultOAuth2AuthorizedClientManager;
-import org.springframework.security.oauth2.client.web.OAuth2AuthorizedClientRepository;
-import org.springframework.security.oauth2.client.web.reactive.function.client.ServletOAuth2AuthorizedClientExchangeFilterFunction;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 
+@Getter
 @Configuration
+@RequiredArgsConstructor
 public class Config {
+    private final ApplicationContext applicationContext;
+
+    @Bean
+    //@Scope("request")
+    public Util util() {
+        return new Util();
+    }
 //    @Bean
 //    WebClient webClient(OAuth2AuthorizedClientManager authorizedClientManager) {
 //        ServletOAuth2AuthorizedClientExchangeFilterFunction oauth2Client =
