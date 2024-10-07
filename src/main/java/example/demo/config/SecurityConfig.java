@@ -49,8 +49,6 @@ public class SecurityConfig {
                 //.authenticationProvider(customAuthenticationProvider())
                 //.httpBasic(Customizer.withDefaults());
 
-
-        //JwtRequestFilter jwtRequestFilter = jwtRequestFilter(userDetailsService());
         http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);  // Add JWT filter
         return http.build();
     }
