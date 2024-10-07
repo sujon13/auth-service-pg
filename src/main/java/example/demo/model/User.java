@@ -3,6 +3,8 @@ package example.demo.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.springframework.data.annotation.CreatedBy;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 
 @Setter
@@ -11,6 +13,7 @@ import lombok.*;
 @Table(name = "users")
 @NoArgsConstructor
 @AllArgsConstructor
+@EntityListeners(AuditingEntityListener.class)
 public class User {
 
     @Id
@@ -23,6 +26,10 @@ public class User {
     private String name;
 
     @NotNull
-    @Column(name = "user_id", unique = true)
-    private Integer userId;
+    @Column(name = "user_name", unique = true)
+    private String userName;
+
+    @CreatedBy
+    @Column(name = "created_by", updatable = false)
+    private String createdBy;
 }

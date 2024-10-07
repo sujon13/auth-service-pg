@@ -1,12 +1,11 @@
 package example.demo.controller;
 
-import example.demo.config.Config;
 import example.demo.model.User;
 import example.demo.model.UserRequest;
 import example.demo.model.UserResponseDto;
 import example.demo.service.ApiCallService;
+import example.demo.service.auth.SecurityService;
 import example.demo.service.UserService;
-import example.demo.service.Util;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -22,12 +21,16 @@ import java.util.Optional;
 public class HelloController {
     private final UserService userService;
     private final ApiCallService apiCallService;
-    private final Config config;
+    private final SecurityService securityService;
 
     @GetMapping("/hello")
     public String sayHello() {
-        Util util = config.getApplicationContext().getBean(Util.class);
-        return "Hello Nusrat! " + util.incrementAndGet();
+        return "Hello Nusrat! ";
+    }
+
+    @GetMapping("/secure")
+    public Double securityTest() {
+        return securityService.getRandom();
     }
 
     @GetMapping("/test")
@@ -42,14 +45,14 @@ public class HelloController {
         return ResponseEntity.ok(userService.getUsers());
     }
 
-    @GetMapping("/users/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer userId,
+    @GetMapping("/users/{id}")
+    public ResponseEntity<User> getUserById(@PathVariable Integer id,
                                             @RequestParam(value = "user_name", required = false) String name,
                                             @RequestBody(required = false) UserRequest userRequest) {
 
-        log.info("userId: " + userId + " name: " + name);
+        log.info("id: " + id + " name: " + name);
         log.info("user request: " + userRequest);
-        Optional<User> user = userService.getUserById(userId);
+        Optional<User> user = userService.getUserById(id);
 
         return user
                 .map(ResponseEntity::ok)
@@ -57,16 +60,16 @@ public class HelloController {
         //.orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/users/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable Integer userId,
+    @PostMapping("/users/{userName}")
+    public ResponseEntity<User> updateUser(@PathVariable String userName,
                                            @RequestBody UserRequest userRequest) {
 
-        if (userId == null) {
+        if (userName == null) {
             log.error("bad request");
             return ResponseEntity.badRequest().build();
         }
 
-        return userService.updateUser(userId, userRequest)
+        return userService.updateUser(userName, userRequest)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -78,15 +81,15 @@ public class HelloController {
                 .orElse(ResponseEntity.internalServerError().build());
     }
 
-    @DeleteMapping("/users/{userId}")
-    public ResponseEntity<Void> delete(@PathVariable Integer userId) {
-        if (userId == null) {
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Integer id) {
+        if (id == null) {
             log.error("bad request");
             return ResponseEntity.badRequest().build();
         }
 
         try {
-            userService.deleteByUserId(userId);
+            userService.deleteById(id);
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();

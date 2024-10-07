@@ -6,6 +6,7 @@ import example.demo.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,33 +26,32 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserById(Integer userId) {
-        return userRepository.findByUserId(userId);
+    public Optional<User> getUserById(Integer id) {
+        return userRepository.findById(id);
     }
 
     @Transactional(readOnly = true)
-    public Optional<User> getUserByName(String name) {
-        return name == null
-                ? Optional.empty()
-                : userRepository.findUserByName(name);
+    public Optional<User> getUserByUserName(String userName) {
+        return userRepository.findByUserName(userName);
     }
 
     @Transactional
-    public Optional<User> updateUser(int userId, UserRequest userRequest) {
-        Optional<User> optionalUser = userRepository.findByUserId(userId);
+    @PreAuthorize("#userName == authentication.name")
+    public Optional<User> updateUser(String userName, UserRequest userRequest) {
+        Optional<User> optionalUser = userRepository.findByUserName(userName);
 
         if (optionalUser.isPresent()) {
             optionalUser.get().setName(userRequest.getName());
             return optionalUser;
         } else {
-            log.error("User not found with userId: " + userId);
+            log.error("User not found with userName: " + userName);
             return Optional.empty();
         }
     }
 
     private User createUserFromRequest(UserRequest userRequest) {
         User user = new User();
-        user.setUserId(userRequest.getUserId());
+        user.setUserName(userRequest.getUserName());
         user.setName(userRequest.getName());
         return user;
     }
@@ -69,9 +69,9 @@ public class UserService {
     }
 
     @Transactional
-    public void deleteByUserId(int userId) {
+    public void deleteById(int id) {
         try {
-            userRepository.deleteByUserId(userId);
+            userRepository.deleteById(id);
         } catch (EmptyResultDataAccessException emptyResultDataAccessException) {
             log.error(emptyResultDataAccessException.getMessage());
             throw new RuntimeException("not found");

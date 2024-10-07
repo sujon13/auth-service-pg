@@ -7,9 +7,8 @@ import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
     //Optional<BaMeetingSchedule> findBaMeetingScheduleByBondApplicationId(Long bondApplicationId);
-    Optional<User> findByUserId(Integer userId);
 
-    Optional<User> findUserByName(String name);
+    Optional<User> findByUserName(String userName);
 
-    void deleteByUserId(int userId);
+    void deleteById(int userId);
 }

@@ -6,5 +6,6 @@ spring:
 
 logging:
   level:
+    org.springframework.security: DEBUG
     org.springframework.jdbc.datasource: INFO
     com.zaxxer.hikari: INFO  # For HikariCP

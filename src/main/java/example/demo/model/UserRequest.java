@@ -10,13 +10,13 @@ import lombok.Setter;
 @Builder
 public class UserRequest {
     @NotNull
-    Integer userId;
+    String userName;
     String name;
 
     @Override
     public String toString() {
         return "UserRequest{" +
-                "userId=" + userId +
+                "userId=" + userName +
                 ", name='" + name + '\'' +
                 '}';
     }
