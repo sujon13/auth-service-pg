@@ -1,25 +1,18 @@
 package example.demo.controller;
 
-import example.demo.model.User;
-import example.demo.model.UserRequest;
 import example.demo.model.UserResponseDto;
 import example.demo.service.ApiCallService;
 import example.demo.service.auth.SecurityService;
-import example.demo.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
 @Slf4j
 public class HelloController {
-    private final UserService userService;
     private final ApiCallService apiCallService;
     private final SecurityService securityService;
 
@@ -38,63 +31,4 @@ public class HelloController {
         UserResponseDto userResponseDto = apiCallService.handleApiCall();
         return ResponseEntity.ok(userResponseDto);
     }
-
-    @RequestMapping(method = RequestMethod.GET, value = "/users")
-    //@GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers());
-    }
-
-    @GetMapping("/users/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id,
-                                            @RequestParam(value = "user_name", required = false) String name,
-                                            @RequestBody(required = false) UserRequest userRequest) {
-
-        log.info("id: " + id + " name: " + name);
-        log.info("user request: " + userRequest);
-        Optional<User> user = userService.getUserById(id);
-
-        return user
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-        //.orElseGet(() -> ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/users/{userName}")
-    public ResponseEntity<User> updateUser(@PathVariable String userName,
-                                           @RequestBody UserRequest userRequest) {
-
-        if (userName == null) {
-            log.error("bad request");
-            return ResponseEntity.badRequest().build();
-        }
-
-        return userService.updateUser(userName, userRequest)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
-    @PostMapping("/users")
-    public ResponseEntity<User> createUser(@RequestBody UserRequest userRequest) {
-        return userService.saveUser(userRequest)
-                .map(user -> new ResponseEntity<>(user, HttpStatus.CREATED))
-                .orElse(ResponseEntity.internalServerError().build());
-    }
-
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Integer id) {
-        if (id == null) {
-            log.error("bad request");
-            return ResponseEntity.badRequest().build();
-        }
-
-        try {
-            userService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().build();
-        }
-    }
-
-
 }

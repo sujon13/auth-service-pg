@@ -47,7 +47,7 @@ public class JwtUtil {
         return Jwts.builder()
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 1))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 3))
                 //.signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .signWith(secretKey())
                 .compact();
@@ -55,6 +55,6 @@ public class JwtUtil {
 
     public Boolean validateToken(String token, String username) {
         final String extractedUsername = extractUsername(token);
-        return (extractedUsername.equals(username) && !isTokenExpired(token));
+        return extractedUsername.equals(username) && !isTokenExpired(token);
     }
 }

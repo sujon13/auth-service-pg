@@ -58,28 +58,28 @@ public class Config {
 //        return authorizedClientManager;
 //    }
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        String hashedUserPassword = passwordEncoder().encode("password1");
-        var user1 = User
-                .withUsername("user1")
-                .password(hashedUserPassword)
-                .roles("USER")
-                .build();
-
-        hashedUserPassword = passwordEncoder().encode("password2");
-        var user2 = User
-                .withUsername("user2")
-                .password(hashedUserPassword)
-                .roles("USER")
-                .build();
-
-        String hashedAdminPassword = passwordEncoder().encode("admin");
-        var admin = User.withUsername("admin")
-                .password(hashedAdminPassword)
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(admin, user1, user2);
-    }
+//    @Bean
+//    public UserDetailsService userDetailsService() {
+//        String hashedUserPassword = passwordEncoder().encode("password1");
+//        var user1 = User
+//                .withUsername("user1")
+//                .password(hashedUserPassword)
+//                .roles("USER")
+//                .build();
+//
+//        hashedUserPassword = passwordEncoder().encode("password2");
+//        var user2 = User
+//                .withUsername("user2")
+//                .password(hashedUserPassword)
+//                .roles("USER")
+//                .build();
+//
+//        String hashedAdminPassword = passwordEncoder().encode("admin");
+//        var admin = User.withUsername("admin")
+//                .password(hashedAdminPassword)
+//                .roles("ADMIN")
+//                .build();
+//        return new InMemoryUserDetailsManager(admin, user1, user2);
+//    }
 
 }

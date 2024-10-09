@@ -12,12 +12,6 @@ public class UserRequest {
     @NotNull
     String userName;
     String name;
-
-    @Override
-    public String toString() {
-        return "UserRequest{" +
-                "userId=" + userName +
-                ", name='" + name + '\'' +
-                '}';
-    }
+    //@NotNull
+    String rawPassword;
 }

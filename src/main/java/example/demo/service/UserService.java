@@ -1,12 +1,24 @@
 package example.demo.service;
 
+import example.demo.model.Role;
 import example.demo.model.User;
 import example.demo.model.UserRequest;
+import example.demo.repository.RoleRepository;
 import example.demo.repository.UserRepository;
+import example.demo.service.auth.PasswordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.access.SecurityConfig;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,21 +28,22 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-@Transactional
+@Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
+    private final RoleService roleService;
+    private final UserRoleService userRoleService;
+    private final PasswordService passwordService;
 
-    @Transactional(readOnly = true)
+    @PreAuthorize("hasRole('ADMIN')")
     public List<User> getUsers() {
         return userRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     public Optional<User> getUserById(Integer id) {
         return userRepository.findById(id);
     }
 
-    @Transactional(readOnly = true)
     public Optional<User> getUserByUserName(String userName) {
         return userRepository.findByUserName(userName);
     }
@@ -39,6 +52,7 @@ public class UserService {
     @PreAuthorize("#userName == authentication.name")
     public Optional<User> updateUser(String userName, UserRequest userRequest) {
         Optional<User> optionalUser = userRepository.findByUserName(userName);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (optionalUser.isPresent()) {
             optionalUser.get().setName(userRequest.getName());
@@ -53,6 +67,7 @@ public class UserService {
         User user = new User();
         user.setUserName(userRequest.getUserName());
         user.setName(userRequest.getName());
+        user.setPassword(passwordService.encode(userRequest.getRawPassword()));
         return user;
     }
 
@@ -81,4 +96,12 @@ public class UserService {
         }
     }
 
+    public List<? extends GrantedAuthority> getRolesOfUser(User user) {
+        List<Integer> roleIds = userRoleService.retrieveRoleIds(user.getId());
+        return roleService.retrieveRoles(roleIds)
+                .stream()
+                .map(Role::getName)
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .toList();
+    }
 }
