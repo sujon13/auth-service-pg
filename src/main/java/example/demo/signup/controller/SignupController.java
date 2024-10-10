@@ -1,8 +1,11 @@
-package example.demo.controller;
+package example.demo.signup.controller;
 
-import example.demo.signup.model.User;
 import example.demo.model.UserRequest;
 import example.demo.service.UserService;
+import example.demo.signup.model.SignupRequest;
+import example.demo.signup.model.User;
+import example.demo.signup.service.SignupService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,9 +18,10 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/users")
-public class UserController {
+@RequestMapping("/api/v1/signup")
+public class SignupController {
     private final UserService userService;
+    private final SignupService signupService;
 
     @RequestMapping(method = RequestMethod.GET, value = "")
     //@GetMapping("/users")
@@ -54,9 +58,15 @@ public class UserController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("")
-    public ResponseEntity<User> createUser(@RequestBody UserRequest userRequest) {
-        return userService.saveUser(userRequest)
+    @PostMapping("/")
+    public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest signupRequest) {
+        if (signupService.isUserNameOrEmailAlreadyExist(signupRequest)) {
+            return ResponseEntity
+                    .badRequest()
+                    .body("username or email already exist");
+        }
+
+        return signupService.signup(signupRequest)
                 .map(user -> new ResponseEntity<>(user, HttpStatus.CREATED))
                 .orElse(ResponseEntity.internalServerError().build());
     }

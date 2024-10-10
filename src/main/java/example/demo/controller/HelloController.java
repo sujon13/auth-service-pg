@@ -26,6 +26,11 @@ public class HelloController {
         return securityService.getRandom();
     }
 
+    /**
+     * Handles the "/test" GET endpoint by making an API call to an external service to retrieve user data.
+     *
+     * @return a ResponseEntity containing a UserResponseDto object with user information fetched from the external service.
+     */
     @GetMapping("/test")
     public ResponseEntity<UserResponseDto> paiTest() {
         UserResponseDto userResponseDto = apiCallService.handleApiCall();

@@ -1,6 +1,6 @@
 package example.demo.service.auth;
 
-import example.demo.model.User;
+import example.demo.signup.model.User;
 import example.demo.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;

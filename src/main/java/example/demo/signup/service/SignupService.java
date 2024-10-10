@@ -1,10 +1,13 @@
-package example.demo.service;
+package example.demo.signup.service;
 
 import example.demo.model.Role;
-import example.demo.signup.model.User;
 import example.demo.model.UserRequest;
 import example.demo.repository.UserRepository;
+import example.demo.service.RoleService;
+import example.demo.service.UserRoleService;
 import example.demo.service.auth.PasswordService;
+import example.demo.signup.model.SignupRequest;
+import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -23,7 +26,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-public class UserService {
+public class SignupService {
     private final UserRepository userRepository;
     private final RoleService roleService;
     private final UserRoleService userRoleService;
@@ -57,17 +60,21 @@ public class UserService {
         }
     }
 
-    private User createUserFromRequest(UserRequest userRequest) {
+    public boolean isUserNameOrEmailAlreadyExist(SignupRequest signupRequest) {
+        return userRepository.existsByUserNameOrEmail(signupRequest.getUserName(), signupRequest.getEmail());
+    }
+
+    private User createUserFromRequest(SignupRequest signupRequest) {
         User user = new User();
-        user.setUserName(userRequest.getUserName());
-        user.setName(userRequest.getName());
-        user.setPassword(passwordService.encode(userRequest.getRawPassword()));
+        user.setUserName(signupRequest.getUserName());
+        user.setEmail(signupRequest.getEmail());
+        user.setName(signupRequest.getName());
+        user.setPassword(passwordService.encode(signupRequest.getRawPassword()));
+        user.setCreatedBy(user.getUsername());
         return user;
     }
 
-    @Transactional
-    public Optional<User> saveUser(UserRequest userRequest) {
-        User user = createUserFromRequest(userRequest);
+    private Optional<User> saveUser(User user) {
         try {
             userRepository.save(user);
             return Optional.of(user);
@@ -75,6 +82,12 @@ public class UserService {
             log.error(exception.getMessage());
             return Optional.empty();
         }
+    }
+
+    @Transactional
+    public Optional<User> signup(SignupRequest signupRequest) {
+        User user = createUserFromRequest(signupRequest);
+        return saveUser(user);
     }
 
     @Transactional

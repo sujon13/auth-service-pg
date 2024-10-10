@@ -1,7 +1,7 @@
 package example.demo.controller;
 
 import example.demo.model.AuthenticationRequest;
-import example.demo.model.User;
+import example.demo.signup.model.User;
 import example.demo.service.UserService;
 import example.demo.service.auth.JwtUtil;
 import example.demo.service.auth.PasswordService;

@@ -2,7 +2,7 @@ package example.demo;
 
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import example.demo.model.User;
+import example.demo.signup.model.User;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
