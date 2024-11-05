@@ -1,21 +1,38 @@
 package example.demo.service.auth;
 
+import example.demo.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
+    private static final String SECRET_KEY = "gbfddbhghrethy485tgergbvdjfbgjeyty34t5yreughfdbjgdfthy4835398wtghdsfgsfls";
+    private static final String AUTHORITIES = "authorities";
 
-    private final String SECRET_KEY = "gbfddbhghrethy485tgergbvdjfbgjeyty34t5yreughfdbjgdfthy4835398wtghdsfgsfls";
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public List<? extends GrantedAuthority> extractRoles(String token) {
+        List<?> rawRoleList = extractClaim(token, (Claims claims) -> claims.get(AUTHORITIES, List.class));
+        // Cast each element to GrantedAuthority and collect to a new list
+        return rawRoleList.stream()
+                .map(String.class::cast)
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
+        //return extractClaim(token, (Claims claims) -> claims.get(AUTHORITIES, List.class));
     }
 
     public Date extractExpiration(String token) {
@@ -43,8 +60,9 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username) {
+    public String generateToken(String username, List<String> roleList) {
         return Jwts.builder()
+                .claim(AUTHORITIES, roleList)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 3))

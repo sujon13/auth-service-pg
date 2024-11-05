@@ -3,14 +3,10 @@ package example.demo.config;
 import example.demo.service.Util;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.web.client.RestClient;
 
 @Getter
@@ -80,6 +76,20 @@ public class Config {
 //                .roles("ADMIN")
 //                .build();
 //        return new InMemoryUserDetailsManager(admin, user1, user2);
+//    }
+
+//    @Bean
+//    public DemoService demoService1() {
+//        DemoService demoService = new DemoService();
+//        demoService.setName("demoService1");
+//        return demoService;
+//    }
+//
+//    @Bean
+//    public DemoService demoService2() {
+//        DemoService demoService = new DemoService();
+//        demoService.setName("demoService2");
+//        return demoService;
 //    }
 
 }

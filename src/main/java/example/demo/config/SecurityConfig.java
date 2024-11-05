@@ -5,8 +5,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,7 +24,7 @@ public class SecurityConfig {
 //    public JwtRequestFilter jwtRequestFilter(UserDetailsService userDetailsService) {
 //        return new JwtRequestFilter(userDetailsService);
 //    }
-
+//
 //    @Bean
 //    public AuthenticationProvider customAuthenticationProvider() {
 //        return new CustomAuthenticationProvider();
@@ -38,13 +36,14 @@ public class SecurityConfig {
         //DaoAuthenticationProvider
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/hello", "/test", "/secure", "/authenticate").permitAll() // Public endpoints
+                        .requestMatchers("/hello", "/secure", "/authenticate").permitAll() // Public endpoints
                         .requestMatchers( "/password", "/api/v1/signup/", "/error").permitAll() // Public endpoints
-
-                        //.requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/test").hasAnyRole("USER")
                         .anyRequest().authenticated()  // Secure other endpoints
                 )
                 .sessionManagement(configurer -> configurer.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

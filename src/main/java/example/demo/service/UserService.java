@@ -29,7 +29,7 @@ public class UserService {
     private final UserRoleService userRoleService;
     private final PasswordService passwordService;
 
-    @PreAuthorize("hasRole('ADMIN')")
+    //@PreAuthorize("hasRole('ADMIN')")
     public List<User> getUsers() {
         return userRepository.findAll();
     }
@@ -90,12 +90,12 @@ public class UserService {
         }
     }
 
-    public List<? extends GrantedAuthority> getRolesOfUser(User user) {
+    public List<String> getRolesOfUser(User user) {
         List<Integer> roleIds = userRoleService.retrieveRoleIds(user.getId());
         return roleService.retrieveRoles(roleIds)
                 .stream()
                 .map(Role::getName)
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                .map(role -> "ROLE_" + role)
                 .toList();
     }
 }
