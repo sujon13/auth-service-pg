@@ -65,7 +65,7 @@ public class JwtUtil {
                 .claim(AUTHORITIES, roleList)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 3))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
                 //.signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .signWith(secretKey())
                 .compact();

@@ -43,7 +43,7 @@ public class exceptionHandler {
     }
 
     @ExceptionHandler(HttpClientErrorException.Forbidden.class)
-    public ResponseEntity<String> handleFirbiddenException(HttpClientErrorException.Forbidden ex) {
+    public ResponseEntity<String> handleForbiddenException(HttpClientErrorException.Forbidden ex) {
         log.error(ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
