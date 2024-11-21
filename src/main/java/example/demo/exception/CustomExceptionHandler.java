@@ -15,7 +15,7 @@ import java.util.Map;
 
 @ControllerAdvice
 @Slf4j
-public class exceptionHandler {
+public class CustomExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {

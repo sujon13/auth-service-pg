@@ -18,6 +18,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
+    private static final String PREFIX = "/api/v1";
+
+
     private final JwtRequestFilter jwtRequestFilter;
 
 //    @Bean
@@ -39,7 +42,8 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/hello", "/secure", "/authenticate").permitAll() // Public endpoints
-                        .requestMatchers( "/password", "/api/v1/signup/", "/error").permitAll() // Public endpoints
+                        .requestMatchers( "/password", PREFIX + "/signup/", "/error").permitAll() // Public endpoints
+                        .requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "USER")
                         .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")

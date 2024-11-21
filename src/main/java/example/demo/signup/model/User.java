@@ -1,13 +1,10 @@
 package example.demo.signup.model;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -45,8 +42,8 @@ public class User implements UserDetails {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "validated")
-    private boolean validated = false;
+    @Column
+    private boolean verified = false;
 
     //@CreatedBy
     @Column(name = "created_by", updatable = false)

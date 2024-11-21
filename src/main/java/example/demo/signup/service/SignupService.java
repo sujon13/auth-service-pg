@@ -6,8 +6,8 @@ import example.demo.repository.UserRepository;
 import example.demo.service.RoleService;
 import example.demo.service.UserRoleService;
 import example.demo.service.auth.PasswordService;
-import example.demo.signup.model.SignupRequest;
-import example.demo.signup.model.User;
+import example.demo.signup.enums.OtpValidation;
+import example.demo.signup.model.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -31,6 +31,8 @@ public class SignupService {
     private final RoleService roleService;
     private final UserRoleService userRoleService;
     private final PasswordService passwordService;
+    private final OtpService otpService;
+
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<User> getUsers() {
@@ -84,10 +86,19 @@ public class SignupService {
         }
     }
 
+    private SignupResponse createSignupResponse(User user) {
+        return SignupResponse.builder()
+                .userId(user.getId())
+                .userName(user.getUsername())
+                .email(user.getEmail())
+                .build();
+    }
+
     @Transactional
-    public Optional<User> signup(SignupRequest signupRequest) {
+    public Optional<SignupResponse> signup(SignupRequest signupRequest) {
         User user = createUserFromRequest(signupRequest);
-        return saveUser(user);
+        return saveUser(user)
+                .map(this::createSignupResponse);
     }
 
     @Transactional
@@ -110,5 +121,43 @@ public class SignupService {
                 .map(Role::getName)
                 .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                 .toList();
+    }
+
+    @Transactional
+    public Optional<OtpResponse> sendOtp(final int userId, final String email) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+
+        if (optionalUser.isEmpty()) {
+            return Optional.empty();
+        }
+
+        User user = optionalUser.get();
+        if (user.getId().equals(userId) && user.getEmail().equals(email)) {
+            return Optional.of(otpService.sendOtp(userId, email));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    private void makeUserVerified(User user) {
+        user.setVerified(true);
+    }
+
+    @Transactional
+    public OtpValidation verifyOtp(final OtpRequest otpRequest) {
+        OtpValidation otpValidation = otpService.validateOtp(otpRequest);
+
+        if (otpValidation.doesNotMatch()) {
+            return otpValidation;
+        }
+
+        Optional<User> optionalUser = userRepository.findById(otpRequest.getUserId());
+        if (optionalUser.isPresent()) {
+            this.makeUserVerified(optionalUser.get());
+            otpService.makeOtpUsed(otpRequest.getId());
+        } else {
+            otpValidation = OtpValidation.USER_NOT_FOUND;
+        }
+        return otpValidation;
     }
 }

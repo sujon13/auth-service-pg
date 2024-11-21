@@ -2,8 +2,8 @@ package example.demo.signup.controller;
 
 import example.demo.model.UserRequest;
 import example.demo.service.UserService;
-import example.demo.signup.model.SignupRequest;
-import example.demo.signup.model.User;
+import example.demo.signup.enums.OtpValidation;
+import example.demo.signup.model.*;
 import example.demo.signup.service.SignupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -67,7 +67,7 @@ public class SignupController {
         }
 
         return signupService.signup(signupRequest)
-                .map(user -> new ResponseEntity<>(user, HttpStatus.CREATED))
+                .map(signupResponse -> new ResponseEntity<>(signupResponse, HttpStatus.CREATED))
                 .orElse(ResponseEntity.internalServerError().build());
     }
 
@@ -83,6 +83,27 @@ public class SignupController {
             return ResponseEntity.noContent().build();
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
+        }
+    }
+
+    @PostMapping("/send-otp")
+    public ResponseEntity<OtpResponse> sendOtp(@Valid @RequestBody OtpSendRequest otpSendRequest) {
+        return signupService.sendOtp(otpSendRequest.getUserId(), otpSendRequest.getEmail())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/verify-otp")
+    public ResponseEntity<String> verifyOtp(@Valid @RequestBody OtpRequest otpRequest) {
+        OtpValidation otpValidation = signupService.verifyOtp(otpRequest);
+        String message = otpValidation.getMessage();
+
+        if (OtpValidation.MATCHED.equals(otpValidation)) {
+            log.info(message);
+            return ResponseEntity.ok(message);
+        } else  {
+            log.error(message);
+            return ResponseEntity.badRequest().body(message);
         }
     }
 }
