@@ -81,7 +81,7 @@ public class OtpService {
     }
 
     private void sendOtp(final EmailRequest emailRequest) {
-        final String emailServiceUrl = emailServiceBaseUrl + "/send-email";
+        final String emailServiceUrl = emailServiceBaseUrl + "/api/v1/emails/send";
         restApiService.postWithoutBody(emailServiceUrl, emailRequest);
     }
 
