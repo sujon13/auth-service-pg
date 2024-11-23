@@ -15,7 +15,10 @@ import java.util.Collection;
 @Getter
 @Builder
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_users_user_name", columnList = "user_name"),
+        @Index(name = "idx_users_email", columnList = "email")
+})
 @NoArgsConstructor
 @AllArgsConstructor
 //@EntityListeners(AuditingEntityListener.class)
@@ -27,7 +30,7 @@ public class User implements UserDetails {
     private Integer id;
 
     @NotNull
-    @Column(name = "user_name", unique = true)
+    @Column(name = "user_name", unique = true, length = 20)
     private String userName;
 
     @NotNull

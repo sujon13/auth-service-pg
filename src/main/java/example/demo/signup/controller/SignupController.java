@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -44,6 +45,11 @@ public class SignupController {
         //.orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/checkUserName")
+    public boolean userNameExists(@RequestParam String userName) {
+        return signupService.isUserNameAlreadyExist(userName);
+    }
+
     @PostMapping("/{userName}")
     public ResponseEntity<User> updateUser(@PathVariable String userName,
                                            @RequestBody UserRequest userRequest) {
@@ -60,10 +66,9 @@ public class SignupController {
 
     @PostMapping("/")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest signupRequest) {
-        if (signupService.isUserNameOrEmailAlreadyExist(signupRequest)) {
-            return ResponseEntity
-                    .badRequest()
-                    .body("username or email already exist");
+        Map<String, String> errorMap = signupService.checkUserNameAndPasswordUniqueness(signupRequest);
+        if (!errorMap.isEmpty()) {
+            return ResponseEntity.badRequest().body(errorMap);
         }
 
         return signupService.signup(signupRequest)

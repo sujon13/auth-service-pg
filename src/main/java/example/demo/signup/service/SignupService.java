@@ -19,7 +19,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -62,8 +64,25 @@ public class SignupService {
         }
     }
 
-    public boolean isUserNameOrEmailAlreadyExist(SignupRequest signupRequest) {
-        return userRepository.existsByUserNameOrEmail(signupRequest.getUserName(), signupRequest.getEmail());
+    public boolean isUserNameAlreadyExist(String userName) {
+        return userRepository.existsByUserName(userName);
+    }
+
+    public Map<String, String> checkUserNameAndPasswordUniqueness(SignupRequest signupRequest) {
+        Map<String, String> errorMap = new HashMap<>();
+        Optional<User> optionalUser = userRepository.findByUserNameOrEmail(signupRequest.getUserName(), signupRequest.getEmail());
+        if (optionalUser.isEmpty()) {
+            return errorMap;
+        }
+        User user = optionalUser.get();
+
+        if (user.getUsername().equals(signupRequest.getUserName())) {
+            errorMap.put("userName", "username already exists");
+        }
+        if (user.getEmail().equals(signupRequest.getEmail())) {
+            errorMap.put("email", "email already exists");
+        }
+        return errorMap;
     }
 
     private User createUserFromRequest(SignupRequest signupRequest) {

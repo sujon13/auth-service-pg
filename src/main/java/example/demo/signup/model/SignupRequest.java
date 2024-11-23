@@ -7,6 +7,7 @@ import jakarta.validation.constraints.Pattern;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
 
 @Getter
@@ -15,11 +16,14 @@ import lombok.Setter;
 @PasswordMatcher
 public class SignupRequest {
     @NotBlank
+    @Length(min = 2, max = 20)
     private String userName;
+
     @NotBlank
     @Email
     private String email;
     private String name;
+
     @NotBlank
     @Pattern(
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,10}$",

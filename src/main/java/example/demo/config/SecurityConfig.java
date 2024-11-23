@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/hello", "/secure", "/authenticate").permitAll() // Public endpoints
                         .requestMatchers( "/password", PREFIX + "/signup/", "/error").permitAll() // Public endpoints
+                        .requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
                         .requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "USER")
