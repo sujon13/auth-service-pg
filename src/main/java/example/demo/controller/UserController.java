@@ -15,7 +15,7 @@ import java.util.Optional;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/users")
+@RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
 
@@ -32,12 +32,8 @@ public class UserController {
 
         log.info("id: " + id + " name: " + name);
         log.info("user request: " + userRequest);
-        Optional<User> user = userService.getUserById(id);
 
-        return user
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-        //.orElseGet(() -> ResponseEntity.notFound().build());
+        return ResponseEntity.ok(userService.getUser(id));
     }
 
     @PostMapping("/{userName}")
@@ -74,5 +70,10 @@ public class UserController {
         } catch (Exception e) {
             return ResponseEntity.badRequest().build();
         }
+    }
+
+    @PostMapping("/{id}/verify")
+    public void verify(@PathVariable("id") final int userId) {
+        userService.makeUserVerified(userId);
     }
 }

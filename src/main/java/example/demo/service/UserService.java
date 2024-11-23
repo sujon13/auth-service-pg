@@ -1,17 +1,16 @@
 package example.demo.service;
 
+import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
-import example.demo.signup.model.User;
 import example.demo.model.UserRequest;
 import example.demo.repository.UserRepository;
 import example.demo.service.auth.PasswordService;
+import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +33,13 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public Optional<User> getUserById(Integer id) {
+    public Optional<User> findById(final int id) {
         return userRepository.findById(id);
+    }
+
+    public User getUser(final int id) {
+        return findById(id)
+                .orElseThrow(() -> new NotFoundException("User not found with id " + id));
     }
 
     public Optional<User> getUserByUserName(String userName) {
@@ -98,4 +102,16 @@ public class UserService {
                 .map(role -> "ROLE_" + role)
                 .toList();
     }
+
+
+    public void makeUserVerified(User user) {
+        user.setVerified(true);
+    }
+
+    @Transactional
+    public void makeUserVerified(final int userId) {
+        User user = getUser(userId);
+        makeUserVerified(user);
+    }
+
 }

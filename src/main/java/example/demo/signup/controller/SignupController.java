@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,21 +27,6 @@ public class SignupController {
     //@GetMapping("/users")
     public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.ok(userService.getUsers());
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Integer id,
-                                            @RequestParam(value = "user_name", required = false) String name,
-                                            @RequestBody(required = false) UserRequest userRequest) {
-
-        log.info("id: " + id + " name: " + name);
-        log.info("user request: " + userRequest);
-        Optional<User> user = userService.getUserById(id);
-
-        return user
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-        //.orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/checkUserName")

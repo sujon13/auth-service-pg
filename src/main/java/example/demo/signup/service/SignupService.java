@@ -1,10 +1,10 @@
 package example.demo.signup.service;
 
-import example.demo.model.Role;
+import example.demo.enums.RoleEnum;
 import example.demo.model.UserRequest;
 import example.demo.repository.UserRepository;
-import example.demo.service.RoleService;
 import example.demo.service.UserRoleService;
+import example.demo.service.UserService;
 import example.demo.service.auth.PasswordService;
 import example.demo.signup.enums.OtpValidation;
 import example.demo.signup.model.*;
@@ -13,8 +13,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +28,10 @@ import java.util.Optional;
 @Transactional(readOnly = true)
 public class SignupService {
     private final UserRepository userRepository;
-    private final RoleService roleService;
     private final UserRoleService userRoleService;
     private final PasswordService passwordService;
     private final OtpService otpService;
+    private final UserService userService;
 
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -113,11 +111,18 @@ public class SignupService {
                 .build();
     }
 
+    private void assignRole(final User user) {
+        userRoleService.assign(user.getId(), RoleEnum.USER);
+    }
+
     @Transactional
     public Optional<SignupResponse> signup(SignupRequest signupRequest) {
         User user = createUserFromRequest(signupRequest);
         return saveUser(user)
-                .map(this::createSignupResponse);
+                .stream()
+                .peek(this::assignRole)
+                .map(this::createSignupResponse)
+                .findAny();
     }
 
     @Transactional
@@ -131,15 +136,6 @@ public class SignupService {
             log.error(e.getMessage());
             throw new RuntimeException(e.getMessage());
         }
-    }
-
-    public List<? extends GrantedAuthority> getRolesOfUser(User user) {
-        List<Integer> roleIds = userRoleService.retrieveRoleIds(user.getId());
-        return roleService.retrieveRoles(roleIds)
-                .stream()
-                .map(Role::getName)
-                .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
-                .toList();
     }
 
     @Transactional
@@ -158,10 +154,6 @@ public class SignupService {
         }
     }
 
-    private void makeUserVerified(User user) {
-        user.setVerified(true);
-    }
-
     @Transactional
     public OtpValidation verifyOtp(final OtpRequest otpRequest) {
         OtpValidation otpValidation = otpService.validateOtp(otpRequest);
@@ -172,7 +164,7 @@ public class SignupService {
 
         Optional<User> optionalUser = userRepository.findById(otpRequest.getUserId());
         if (optionalUser.isPresent()) {
-            this.makeUserVerified(optionalUser.get());
+            userService.makeUserVerified(optionalUser.get());
             otpService.makeOtpUsed(otpRequest.getId());
         } else {
             otpValidation = OtpValidation.USER_NOT_FOUND;

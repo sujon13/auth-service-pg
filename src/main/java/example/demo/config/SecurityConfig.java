@@ -41,13 +41,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/hello", "/secure", "/authenticate").permitAll() // Public endpoints
-                        .requestMatchers( "/password", PREFIX + "/signup/", "/error").permitAll() // Public endpoints
+                        .requestMatchers("/hello", "/secure").permitAll() // Public endpoints
+                        .requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll() //Public
+                        .requestMatchers(PREFIX + "/signup/", "/error").permitAll() // Public endpoints
                         .requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
                         .requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users").hasAnyRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/users").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers("/users/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(HttpMethod.GET, PREFIX + "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, PREFIX + "/users").hasAnyRole("ADMIN", "USER")
+                        .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify")
+                            .hasRole("ADMIN")
+                        .requestMatchers(PREFIX + "/users/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/test").hasAnyRole("USER")
                         .anyRequest().authenticated()  // Secure other endpoints
                 )

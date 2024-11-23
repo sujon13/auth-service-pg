@@ -1,7 +1,8 @@
 package example.demo.service.auth;
 
-import example.demo.signup.model.User;
+import example.demo.exception.EmailNotVerifiedException;
 import example.demo.service.UserService;
+import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -28,9 +29,16 @@ public class AuthenticationManagerImp implements AuthenticationManager {
             log.error("User not found with name {}", authentication.getName());
             throw new BadCredentialsException("Username or Password is Wrong!");
         }
-        if (!passwordEncoder.matches(rawPassword, optionalUser.get().getPassword())) {
+
+        User user = optionalUser.get();
+        if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             log.error("password does not match for user {}", authentication.getName());
             throw new BadCredentialsException("Username or Password is Wrong!");
+        }
+
+        if (!user.isVerified()) {
+            log.error("Email is not verified for user {}", authentication.getName());
+            throw new EmailNotVerifiedException("Email is not verified");
         }
         return authentication;
     }

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/api/v1")
 public class AuthenticationController {
     private final PasswordService passwordService;
     private final AuthenticationService authenticationService;
@@ -23,8 +24,4 @@ public class AuthenticationController {
         return passwordService.encode(password);
     }
 
-    @GetMapping("/test-authenticate")
-    public String testAuthenticatedUser() {
-        return "test response (only authenticated user will receive!";
-    }
 }
