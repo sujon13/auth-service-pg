@@ -66,7 +66,7 @@ public class OtpService {
         final String subject = "Live Exam One Time password (OTP)";
         final String bodyTemplate = """
                 Dear User,<br><br>
-                Your OTP (One Time Password) is <b> %d </b>. Use this OTP to complete the signup process.<br>
+                Your OTP (One Time Password) is <b> %d</b>. Use this OTP to complete the signup process.<br>
                 It is valid for the next 3 minutes. Please do not share it with others.<br><br>
                 Thank you.<br><br>
                 Regards,<br>
