@@ -5,6 +5,7 @@ import example.demo.oauth.model.ExternalUserInfo;
 import example.demo.oauth.model.ExternalUserResponse;
 import example.demo.oauth.model.TokenRequest;
 import example.demo.oauth.model.TokenResponse;
+import example.demo.service.UserRoleService;
 import example.demo.service.UserService;
 import example.demo.service.auth.AuthenticationService;
 import example.demo.signup.enums.AccountType;
@@ -52,6 +53,7 @@ public class OAuth2Service {
     private final RestClient restClient;
     private final UserService userService;
     private final AuthenticationService authenticationService;
+    private final UserRoleService userRoleService;
 
     public URI buildAuthorizationUrl(final String state) {
         return UriComponentsBuilder.fromHttpUrl(authorizationUrl)
@@ -115,16 +117,22 @@ public class OAuth2Service {
         }
     }
 
+    private User registerUser(ExternalUserInfo externalUserInfo) {
+        User newUser = userService.createAndSaveUser(externalUserInfo);
+        userRoleService.assignUserRole(newUser.getId());
+        return newUser;
+    }
+
+    private User updateUser(User existingUser, ExternalUserInfo externalUserInfo) {
+        log.info("User already exist with accountId: {}", existingUser.getAccountId());
+        userService.updateUser(existingUser, externalUserInfo);
+        return existingUser;
+    }
+
     private User registerOrUpdateUser(ExternalUserInfo externalUserInfo) {
-        Optional<User> optionalUser = userService.findByAccountId(externalUserInfo.getAccountId());
-        if (optionalUser.isPresent()) {
-            User existingUser = optionalUser.get();
-            log.info("User already exist with accountId: {}", existingUser.getAccountId());
-            userService.updateUser(existingUser, externalUserInfo);
-            return existingUser;
-        } else {
-            return userService.createAndSaveUser(externalUserInfo);
-        }
+        return userService.findByAccountId(externalUserInfo.getAccountId())
+                .map(existingUser -> updateUser(existingUser, externalUserInfo))
+                .orElseGet(() -> registerUser(externalUserInfo));
     }
 
     @Transactional
