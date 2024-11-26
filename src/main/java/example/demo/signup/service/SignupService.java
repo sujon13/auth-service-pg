@@ -111,16 +111,12 @@ public class SignupService {
                 .build();
     }
 
-    private void assignRole(final User user) {
-        userRoleService.assign(user.getId(), RoleEnum.USER);
-    }
-
     @Transactional
     public Optional<SignupResponse> signup(SignupRequest signupRequest) {
-        User user = createUserFromRequest(signupRequest);
-        return saveUser(user)
+        User newUser = createUserFromRequest(signupRequest);
+        return saveUser(newUser)
                 .stream()
-                .peek(this::assignRole)
+                .peek(user -> userRoleService.assignUserRole(user.getId()))
                 .map(this::createSignupResponse)
                 .findAny();
     }

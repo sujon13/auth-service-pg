@@ -1,19 +1,26 @@
 package example.demo.oauth.service;
 
 
+import example.demo.oauth.model.ExternalUserInfo;
+import example.demo.oauth.model.ExternalUserResponse;
 import example.demo.oauth.model.TokenRequest;
 import example.demo.oauth.model.TokenResponse;
-import example.demo.oauth.model.UserInfo;
+import example.demo.service.UserService;
+import example.demo.service.auth.AuthenticationService;
+import example.demo.signup.enums.AccountType;
+import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -43,14 +50,16 @@ public class OAuth2Service {
     private String userInfoUrl;
 
     private final RestClient restClient;
+    private final UserService userService;
+    private final AuthenticationService authenticationService;
 
-
-    public URI buildAuthorizationUrl() {
+    public URI buildAuthorizationUrl(final String state) {
         return UriComponentsBuilder.fromHttpUrl(authorizationUrl)
                 .queryParam("client_id", clientId)
                 .queryParam("redirect_uri", redirectUri)
                 .queryParam("response_type", RESPONSE_TYPE)
                 .queryParam("scope", SCOPE)
+                .queryParam("state", state)
                 .queryParam("access_type", ACCESS_TYPE)
                 .queryParam("prompt", PROMPT)
                 .build()
@@ -87,7 +96,7 @@ public class OAuth2Service {
         }
     }
 
-    public UserInfo getUserInfo(final String accessToken) {
+    public ExternalUserInfo getUserInfo(final String accessToken) {
         final String bearerToken = "Bearer " + accessToken;
 
         var responseEntity = restClient
@@ -95,14 +104,58 @@ public class OAuth2Service {
                 .uri(userInfoUrl)
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
-                .toEntity(UserInfo.class);
+                .toEntity(ExternalUserInfo.class);
 
-        log.info("User Info status code: {}", responseEntity.getStatusCode());
+        log.info("External User Info status code: {}", responseEntity.getStatusCode());
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
             log.info("Response Body: {}", responseEntity.getBody());
             return responseEntity.getBody();
         } else {
             return null;
         }
+    }
+
+    private User registerOrUpdateUser(ExternalUserInfo externalUserInfo) {
+        Optional<User> optionalUser = userService.findByAccountId(externalUserInfo.getAccountId());
+        if (optionalUser.isPresent()) {
+            User existingUser = optionalUser.get();
+            log.info("User already exist with accountId: {}", existingUser.getAccountId());
+            userService.updateUser(existingUser, externalUserInfo);
+            return existingUser;
+        } else {
+            return userService.createAndSaveUser(externalUserInfo);
+        }
+    }
+
+    @Transactional
+    public User authenticateUserWithGoogle(final String authCode) {
+        TokenResponse tokenResponse = getAccessToken(authCode);
+        ExternalUserInfo externalUserInfo = getUserInfo(tokenResponse.getAccessToken());
+        externalUserInfo.setAccountType(AccountType.GOOGLE);
+
+        return registerOrUpdateUser(externalUserInfo);
+    }
+
+    private ExternalUserResponse createExternalUserResponse(final User user) {
+        return ExternalUserResponse.builder()
+                .userId(user.getId())
+                .accountId(user.getAccountId())
+                .build();
+    }
+
+    public ExternalUserResponse buildErrorResponse(final User user) {
+        ExternalUserResponse externalUserResponse = createExternalUserResponse(user);
+        final String errorMessage = "User is verified by Google but also needs to create a userName " +
+                "to complete the registration";
+        log.error(errorMessage);
+        externalUserResponse.setMessage(errorMessage);
+        return externalUserResponse;
+    }
+
+    public ExternalUserResponse buildJwtResponse(final User user) {
+        ExternalUserResponse externalUserResponse = createExternalUserResponse(user);
+        final String jwt = authenticationService.createAuthenticationToken(user);
+        externalUserResponse.setMessage(jwt);
+        return externalUserResponse;
     }
 }

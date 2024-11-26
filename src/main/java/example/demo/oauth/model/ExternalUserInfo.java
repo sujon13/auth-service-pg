@@ -1,6 +1,7 @@
 package example.demo.oauth.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import example.demo.signup.enums.AccountType;
 import lombok.*;
 
 @Getter
@@ -9,10 +10,12 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class UserInfo {
+public class ExternalUserInfo {
     @JsonProperty("sub")
-    private String googleId; // "117282101864315147161"
+    private String accountId; // "117282101864315147161"
 
     private String email;
     private String name;
+
+    private AccountType accountType = AccountType.GOOGLE;
 }

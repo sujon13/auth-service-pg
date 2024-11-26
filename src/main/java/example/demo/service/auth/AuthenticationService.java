@@ -26,14 +26,16 @@ public class AuthenticationService {
         );
     }
 
+    public String createAuthenticationToken(User user) {
+        List<String> roleList = userService.getRolesOfUser(user.getId());
+        return jwtUtil.generateToken(user.getUsername(), roleList);
+    }
+
     public String createAuthenticationToken(AuthenticationRequest request) {
         authenticate(request);
 
         //final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         final User user = userService.getUserByUserName(request.getUserName()).orElseThrow();
-        List<String> roleList = userService.getRolesOfUser(user);
-        final String jwt = jwtUtil.generateToken(user.getUsername(), roleList);
-        //final String jwt = "abc";
-        return jwt;
+        return createAuthenticationToken(user);
     }
 }

@@ -3,12 +3,15 @@ package example.demo.service;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
 import example.demo.model.UserRequest;
+import example.demo.oauth.model.ExternalUserInfo;
+import example.demo.oauth.model.UserNameRequest;
 import example.demo.repository.UserRepository;
 import example.demo.service.auth.PasswordService;
 import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -40,6 +43,10 @@ public class UserService {
     public User getUser(final int id) {
         return findById(id)
                 .orElseThrow(() -> new NotFoundException("User not found with id " + id));
+    }
+
+    public Optional<User> findByAccountId(final String accountId) {
+        return userRepository.findByAccountId(accountId);
     }
 
     public Optional<User> getUserByUserName(String userName) {
@@ -81,6 +88,41 @@ public class UserService {
         }
     }
 
+    private User createUser(ExternalUserInfo externalUserInfo) {
+        User user = new User();
+        user.setAccountType(externalUserInfo.getAccountType());
+        user.setAccountId(externalUserInfo.getAccountId());
+        user.setEmail(externalUserInfo.getEmail());
+        user.setName(externalUserInfo.getName());
+        return user;
+    }
+
+    public void updateUser(User user, ExternalUserInfo externalUserInfo) {
+        user.setName(externalUserInfo.getName());
+        user.setEmail(externalUserInfo.getEmail());
+    }
+
+    @Transactional
+    public User createAndSaveUser(ExternalUserInfo externalUserInfo) {
+        User newUser = createUser(externalUserInfo);
+        userRepository.save(newUser);
+        return newUser;
+    }
+
+    @Transactional
+    public User updateUserNameOfOAuthAccount(final UserNameRequest request) {
+        User user = getUser(request.getUserId());
+        if (user.getAccountId().equals(request.getAccountId())) {
+            user.setUserName(request.getUserName());
+            makeUserVerified(user);
+            return user;
+        } else {
+            final String errorMessage = "AccountId does not match";
+            log.error(errorMessage);
+            throw new AccessDeniedException(errorMessage);
+        }
+    }
+
     @Transactional
     public void deleteById(int id) {
         try {
@@ -94,8 +136,8 @@ public class UserService {
         }
     }
 
-    public List<String> getRolesOfUser(User user) {
-        List<Integer> roleIds = userRoleService.retrieveRoleIds(user.getId());
+    public List<String> getRolesOfUser(final int userId) {
+        List<Integer> roleIds = userRoleService.retrieveRoleIds(userId);
         return roleService.retrieveRoles(roleIds)
                 .stream()
                 .map(Role::getName)
