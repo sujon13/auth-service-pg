@@ -2,6 +2,8 @@ package example.demo.signup.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import example.demo.signup.AccountTypeConverter;
+import example.demo.signup.enums.AccountType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -29,7 +31,14 @@ public class User implements UserDetails {
     @Column(name = "id")
     private Integer id;
 
-    @NotNull
+    @Column(name = "account_type")
+    @Convert(converter = AccountTypeConverter.class)
+    private AccountType accountType = AccountType.REGULAR;
+
+    @Column(name = "account_id", length = 128)
+    private String accountId;
+
+    //@NotNull
     @Column(name = "user_name", unique = true, length = 20)
     private String userName;
 
@@ -37,7 +46,7 @@ public class User implements UserDetails {
     @Column(name = "email", unique = true)
     private String email;
 
-    @NotNull
+    //@NotNull
     @Column(name = "password")
     @JsonIgnore
     private String password;

@@ -43,6 +43,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/hello", "/secure").permitAll() // Public endpoints
                         .requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll() //Public
+                        .requestMatchers(PREFIX + "/authenticate/google", PREFIX + "/oauth2/callback").permitAll()
                         .requestMatchers(PREFIX + "/signup/", "/error").permitAll() // Public endpoints
                         .requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
                         .requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
