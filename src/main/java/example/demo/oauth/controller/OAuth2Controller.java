@@ -19,7 +19,7 @@ public class OAuth2Controller {
     @GetMapping("/oauth2/callback")
     public void handleOAuthCallback(@RequestParam final String code) {
         var tokenResponse = oAuth2Service.getAccessToken(code);
-        var userInfo = oAuth2Service.getUserInfo(tokenResponse.getAccessToken());git
+        var userInfo = oAuth2Service.getUserInfo(tokenResponse.getAccessToken());
         //return "redirect:/home";
     }
 
