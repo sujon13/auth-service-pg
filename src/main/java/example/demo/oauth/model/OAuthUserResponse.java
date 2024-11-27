@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ExternalUserResponse {
+public class OAuthUserResponse {
     private Integer userId;
     private String accountId; // "117282101864315147161"
     private String message;

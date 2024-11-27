@@ -3,7 +3,7 @@ package example.demo.service;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
 import example.demo.model.UserRequest;
-import example.demo.oauth.model.ExternalUserInfo;
+import example.demo.oauth.model.OAuthUser;
 import example.demo.oauth.model.UserNameRequest;
 import example.demo.repository.UserRepository;
 import example.demo.service.auth.PasswordService;
@@ -45,8 +45,8 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("User not found with id " + id));
     }
 
-    public Optional<User> findByAccountId(final String accountId) {
-        return userRepository.findByAccountId(accountId);
+    public Optional<User> findByAccountIdOrEmail(final String accountId, final String email) {
+        return userRepository.findByAccountIdOrEmail(accountId, email);
     }
 
     public Optional<User> getUserByUserName(String userName) {
@@ -88,23 +88,18 @@ public class UserService {
         }
     }
 
-    private User createUser(ExternalUserInfo externalUserInfo) {
+    private User createUser(OAuthUser oAuthUser) {
         User user = new User();
-        user.setAccountType(externalUserInfo.getAccountType());
-        user.setAccountId(externalUserInfo.getAccountId());
-        user.setEmail(externalUserInfo.getEmail());
-        user.setName(externalUserInfo.getName());
+        user.setAccountType(oAuthUser.getAccountType());
+        user.setAccountId(oAuthUser.getAccountId());
+        user.setEmail(oAuthUser.getEmail());
+        user.setName(oAuthUser.getName());
         return user;
     }
 
-    public void updateUser(User user, ExternalUserInfo externalUserInfo) {
-        user.setName(externalUserInfo.getName());
-        user.setEmail(externalUserInfo.getEmail());
-    }
-
     @Transactional
-    public User createAndSaveUser(ExternalUserInfo externalUserInfo) {
-        User newUser = createUser(externalUserInfo);
+    public User createAndSaveUser(OAuthUser oAuthUser) {
+        User newUser = createUser(oAuthUser);
         userRepository.save(newUser);
         return newUser;
     }

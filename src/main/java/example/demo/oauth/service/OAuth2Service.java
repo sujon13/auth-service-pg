@@ -1,8 +1,8 @@
 package example.demo.oauth.service;
 
 
-import example.demo.oauth.model.ExternalUserInfo;
-import example.demo.oauth.model.ExternalUserResponse;
+import example.demo.oauth.model.OAuthUser;
+import example.demo.oauth.model.OAuthUserResponse;
 import example.demo.oauth.model.TokenRequest;
 import example.demo.oauth.model.TokenResponse;
 import example.demo.service.UserRoleService;
@@ -21,7 +21,6 @@ import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -98,7 +97,7 @@ public class OAuth2Service {
         }
     }
 
-    public ExternalUserInfo getUserInfo(final String accessToken) {
+    public OAuthUser getUserInfo(final String accessToken) {
         final String bearerToken = "Bearer " + accessToken;
 
         var responseEntity = restClient
@@ -106,7 +105,7 @@ public class OAuth2Service {
                 .uri(userInfoUrl)
                 .header(HttpHeaders.AUTHORIZATION, bearerToken)
                 .retrieve()
-                .toEntity(ExternalUserInfo.class);
+                .toEntity(OAuthUser.class);
 
         log.info("External User Info status code: {}", responseEntity.getStatusCode());
         if (responseEntity.getStatusCode().is2xxSuccessful()) {
@@ -117,53 +116,62 @@ public class OAuth2Service {
         }
     }
 
-    private User registerUser(ExternalUserInfo externalUserInfo) {
-        User newUser = userService.createAndSaveUser(externalUserInfo);
+    private User registerUser(OAuthUser oAuthUser) {
+        User newUser = userService.createAndSaveUser(oAuthUser);
         userRoleService.assignUserRole(newUser.getId());
         return newUser;
     }
 
-    private User updateUser(User existingUser, ExternalUserInfo externalUserInfo) {
-        log.info("User already exist with accountId: {}", existingUser.getAccountId());
-        userService.updateUser(existingUser, externalUserInfo);
+    private User updateUser(User existingUser, OAuthUser oAuthUser) {
+        log.info("User already exist with accountId: {}, email: {}", existingUser.getAccountId(), existingUser.getEmail());
+        if (existingUser.getAccountId() == null)
+            existingUser.setAccountId(oAuthUser.getAccountId());
+
+        if (existingUser.isRegularUser()) {
+            if (existingUser.getName() == null)
+                existingUser.setName(oAuthUser.getName());
+        } else {
+            if (oAuthUser.getName() != null)
+                existingUser.setName(oAuthUser.getName());
+        }
         return existingUser;
     }
 
-    private User registerOrUpdateUser(ExternalUserInfo externalUserInfo) {
-        return userService.findByAccountId(externalUserInfo.getAccountId())
-                .map(existingUser -> updateUser(existingUser, externalUserInfo))
-                .orElseGet(() -> registerUser(externalUserInfo));
+    private User registerOrUpdateUser(OAuthUser oAuthUser) {
+        return userService.findByAccountIdOrEmail(oAuthUser.getAccountId(), oAuthUser.getEmail())
+                .map(existingUser -> updateUser(existingUser, oAuthUser))
+                .orElseGet(() -> registerUser(oAuthUser));
     }
 
     @Transactional
     public User authenticateUserWithGoogle(final String authCode) {
         TokenResponse tokenResponse = getAccessToken(authCode);
-        ExternalUserInfo externalUserInfo = getUserInfo(tokenResponse.getAccessToken());
-        externalUserInfo.setAccountType(AccountType.GOOGLE);
+        OAuthUser oAuthUser = getUserInfo(tokenResponse.getAccessToken());
+        oAuthUser.setAccountType(AccountType.GOOGLE);
 
-        return registerOrUpdateUser(externalUserInfo);
+        return registerOrUpdateUser(oAuthUser);
     }
 
-    private ExternalUserResponse createExternalUserResponse(final User user) {
-        return ExternalUserResponse.builder()
+    private OAuthUserResponse createOAuthUserResponse(final User user) {
+        return OAuthUserResponse.builder()
                 .userId(user.getId())
                 .accountId(user.getAccountId())
                 .build();
     }
 
-    public ExternalUserResponse buildErrorResponse(final User user) {
-        ExternalUserResponse externalUserResponse = createExternalUserResponse(user);
+    public OAuthUserResponse buildErrorResponse(final User user) {
+        OAuthUserResponse oAuthUserResponse = createOAuthUserResponse(user);
         final String errorMessage = "User is verified by Google but also needs to create a userName " +
                 "to complete the registration";
         log.error(errorMessage);
-        externalUserResponse.setMessage(errorMessage);
-        return externalUserResponse;
+        oAuthUserResponse.setMessage(errorMessage);
+        return oAuthUserResponse;
     }
 
-    public ExternalUserResponse buildJwtResponse(final User user) {
-        ExternalUserResponse externalUserResponse = createExternalUserResponse(user);
+    public OAuthUserResponse buildJwtResponse(final User user) {
+        OAuthUserResponse oAuthUserResponse = createOAuthUserResponse(user);
         final String jwt = authenticationService.createAuthenticationToken(user);
-        externalUserResponse.setMessage(jwt);
-        return externalUserResponse;
+        oAuthUserResponse.setMessage(jwt);
+        return oAuthUserResponse;
     }
 }

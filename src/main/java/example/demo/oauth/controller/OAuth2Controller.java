@@ -1,6 +1,6 @@
 package example.demo.oauth.controller;
 
-import example.demo.oauth.model.ExternalUserResponse;
+import example.demo.oauth.model.CallbackRequest;
 import example.demo.oauth.model.UserNameRequest;
 import example.demo.oauth.service.OAuth2Service;
 import example.demo.oauth.service.OAuth2SessionService;
@@ -31,10 +31,19 @@ public class OAuth2Controller {
 
 
     @GetMapping("/google/callback")
-    public ResponseEntity<ExternalUserResponse> handleOAuthCallback(@RequestParam final String code, @RequestParam final String state, HttpSession session) {
-        oAuth2SessionService.checkStateParam(session, state);
+    public ResponseEntity<?> handleOAuthCallback(
+            CallbackRequest callbackRequest, HttpSession session) {
 
-        var user = oAuth2Service.authenticateUserWithGoogle(code);
+        if (callbackRequest.getError() != null) {
+            log.error(callbackRequest.getError());
+            return ResponseEntity
+                    .status(HttpStatus.FORBIDDEN)
+                    .body("User did not grant permission to access his/her information");
+        }
+
+        oAuth2SessionService.checkStateParam(session, callbackRequest.getState());
+
+        var user = oAuth2Service.authenticateUserWithGoogle(callbackRequest.getCode());
         if (user.getUsername() == null) {
             return ResponseEntity
                     .status(HttpStatus.UNPROCESSABLE_ENTITY)

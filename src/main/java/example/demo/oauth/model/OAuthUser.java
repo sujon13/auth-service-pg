@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-public class ExternalUserInfo {
+public class OAuthUser {
     @JsonProperty("sub")
     private String accountId; // "117282101864315147161"
 

@@ -97,4 +97,9 @@ public class User implements UserDetails {
     public boolean isCredentialsNonExpired() {
         return UserDetails.super.isCredentialsNonExpired();
     }
+
+    public boolean isRegularUser() {
+        return AccountType.REGULAR.equals(this.accountType);
+    }
+
 }
