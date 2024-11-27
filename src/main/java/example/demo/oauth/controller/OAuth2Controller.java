@@ -2,6 +2,7 @@ package example.demo.oauth.controller;
 
 import example.demo.oauth.model.CallbackRequest;
 import example.demo.oauth.model.UserNameRequest;
+import example.demo.oauth.service.GoogleOAuthService;
 import example.demo.oauth.service.OAuth2Service;
 import example.demo.oauth.service.OAuth2SessionService;
 import example.demo.service.UserService;
@@ -25,6 +26,7 @@ import java.util.UUID;
 public class OAuth2Controller {
 
     private final OAuth2Service oAuth2Service;
+    private final GoogleOAuthService googleOAuthService;
     private final OAuth2SessionService oAuth2SessionService;
     private final UserService userService;
     private final AuthenticationService authenticationService;
@@ -43,7 +45,7 @@ public class OAuth2Controller {
 
         oAuth2SessionService.checkStateParam(session, callbackRequest.getState());
 
-        var user = oAuth2Service.authenticateUserWithGoogle(callbackRequest.getCode());
+        var user = googleOAuthService.authenticateUserWithGoogle(callbackRequest.getCode());
         if (user.getUsername() == null) {
             return ResponseEntity
                     .status(HttpStatus.UNPROCESSABLE_ENTITY)
@@ -68,7 +70,7 @@ public class OAuth2Controller {
         final String state = generateStateParameter();
         oAuth2SessionService.storeStateInSession(session, state);
 
-        URI uri = oAuth2Service.buildAuthorizationUrl(state);
+        URI uri = googleOAuthService.buildAuthorizationUrl(state);
         log.info("Google auth url: {}", uri.toString());
         return ResponseEntity.status(HttpStatus.FOUND).location(uri).build();
     }
