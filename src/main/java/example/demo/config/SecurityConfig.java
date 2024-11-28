@@ -70,7 +70,7 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:*");
+        config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedMethod(CorsConfiguration.ALL);
         config.addAllowedHeader(CorsConfiguration.ALL);
         config.setAllowCredentials(true);
