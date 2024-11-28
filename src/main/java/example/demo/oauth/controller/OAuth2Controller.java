@@ -8,6 +8,7 @@ import example.demo.oauth.service.OAuth2SessionService;
 import example.demo.service.UserService;
 import example.demo.service.auth.AuthenticationService;
 import example.demo.signup.model.User;
+import example.demo.util.RandomUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
-import java.util.UUID;
 
 @RestController
 @Slf4j
@@ -30,6 +30,7 @@ public class OAuth2Controller {
     private final OAuth2SessionService oAuth2SessionService;
     private final UserService userService;
     private final AuthenticationService authenticationService;
+    private final RandomUtil randomUtil;
 
 
     @GetMapping("/google/callback")
@@ -62,7 +63,7 @@ public class OAuth2Controller {
     }
 
     private String generateStateParameter() {
-        return UUID.randomUUID().toString();
+        return randomUtil.getUUID();
     }
 
     @GetMapping("/google/authenticate")
