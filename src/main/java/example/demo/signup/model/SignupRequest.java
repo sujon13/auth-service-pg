@@ -16,7 +16,11 @@ import org.hibernate.validator.constraints.Length;
 @PasswordMatcher
 public class SignupRequest {
     @NotBlank
-    @Length(min = 2, max = 20)
+    @Length(min = 3, max = 20)
+    @Pattern(
+            regexp = "^[a-zA-Z][a-zA-Z0-9._-]{1,18}[a-zA-Z0-9]$",
+            message = "Username must start with an alphabet, end with an alphanumeric character, and only '.', '_', and '-' are allowed"
+    )
     private String userName;
 
     @NotBlank
@@ -27,7 +31,8 @@ public class SignupRequest {
     @NotBlank
     @Pattern(
             regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,10}$",
-            message = "Password length must be between 6 and 10 and include at least one uppercase letter, one lowercase letter, and one digit without any special characters"
+            message = "Password length must be between 6 and 10 and include at least one uppercase letter, " +
+                    "one lowercase letter, and one digit without any special characters"
     )
     private String rawPassword;
     @NotBlank
