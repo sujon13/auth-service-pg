@@ -19,7 +19,8 @@ import java.util.Collection;
 @Entity
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_user_name", columnList = "user_name"),
-        @Index(name = "idx_users_email", columnList = "email")
+        @Index(name = "idx_users_email", columnList = "email"),
+        @Index(name = "idx_users_account_id", columnList = "account_id"),
 })
 @NoArgsConstructor
 @AllArgsConstructor

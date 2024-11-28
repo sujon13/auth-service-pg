@@ -1,6 +1,7 @@
 package example.demo.signup.model;
 
 import example.demo.signup.annotation.PasswordMatcher;
+import example.demo.util.Constants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -17,10 +18,7 @@ import org.hibernate.validator.constraints.Length;
 public class SignupRequest {
     @NotBlank
     @Length(min = 3, max = 20)
-    @Pattern(
-            regexp = "^[a-zA-Z][a-zA-Z0-9._-]{1,18}[a-zA-Z0-9]$",
-            message = "Username must start with an alphabet, end with an alphanumeric character, and only '.', '_', and '-' are allowed"
-    )
+    @Pattern(regexp = Constants.USER_NAME_REGEXP, message = Constants.USER_NAME_ERROR_MESSAGE)
     private String userName;
 
     @NotBlank
