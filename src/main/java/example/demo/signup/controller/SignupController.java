@@ -48,7 +48,7 @@ public class SignupController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping("/")
+    @PostMapping("")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest signupRequest) {
         Map<String, String> errorMap = signupService.checkUserNameAndPasswordUniqueness(signupRequest);
         if (!errorMap.isEmpty()) {

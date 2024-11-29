@@ -42,13 +42,12 @@ public class SecurityConfig {
         //DaoAuthenticationProvider
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/hello", "/secure").permitAll() // Public endpoints
                         .requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll() //Public
                         .requestMatchers(PREFIX + "/oauth2/google/authenticate", PREFIX + "/oauth2/google/callback",
                                 PREFIX + "/oauth2/register").permitAll()
-                        .requestMatchers(PREFIX + "/signup/", "/error").permitAll() // Public endpoints
+                        .requestMatchers(PREFIX + "/signup", "/error").permitAll() // Public endpoints
                         .requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
                         .requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET, PREFIX + "/users").hasRole("ADMIN")
@@ -80,9 +79,4 @@ public class SecurityConfig {
 
         return new CorsFilter(source);
     }
-
-//    @Bean
-//    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-//        return authenticationConfiguration.getAuthenticationManager();
-//    }
 }
