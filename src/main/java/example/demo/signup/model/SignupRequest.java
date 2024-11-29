@@ -24,14 +24,11 @@ public class SignupRequest {
     @NotBlank
     @Email
     private String email;
+    @Length(max = 128)
     private String name;
 
     @NotBlank
-    @Pattern(
-            regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z]).{6,10}$",
-            message = "Password length must be between 6 and 10 and include at least one uppercase letter, " +
-                    "one lowercase letter, and one digit without any special characters"
-    )
+    @Pattern(regexp = Constants.PASSWORD_REGEXP, message = Constants.PASSWORD_ERROR_MESSAGE)
     private String rawPassword;
     @NotBlank
     private String reTypeRawPassword;
