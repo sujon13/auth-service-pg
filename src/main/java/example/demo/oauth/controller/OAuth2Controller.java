@@ -7,13 +7,16 @@ import example.demo.oauth.service.OAuth2Service;
 import example.demo.oauth.service.OAuth2SessionService;
 import example.demo.service.UserService;
 import example.demo.service.auth.AuthenticationService;
+import example.demo.service.auth.CookieService;
 import example.demo.signup.model.User;
 import example.demo.util.RandomUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -31,6 +34,7 @@ public class OAuth2Controller {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final RandomUtil randomUtil;
+    private final CookieService cookieService;
 
 
     @GetMapping("/google/callback")
@@ -47,13 +51,27 @@ public class OAuth2Controller {
         oAuth2SessionService.checkStateParam(session, callbackRequest.getState());
 
         var user = googleOAuthService.authenticateUserWithGoogle(callbackRequest.getCode());
-        if (user.getUsername() == null) {
-            return ResponseEntity
-                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-                    .body(oAuth2Service.buildErrorResponse(user));
-        } else {
-            return ResponseEntity.ok(oAuth2Service.buildJwtResponse(user));
-        }
+
+        URI uri = URI.create("http://localhost:5173/");
+        final String jwt = authenticationService.createAuthenticationToken(user);
+        final ResponseCookie authCookie = cookieService.buildAuthCookie(jwt);
+        return ResponseEntity
+                .status(HttpStatus.FOUND)
+                .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                .location(uri)
+                .build();
+
+//        if (user.getUsername() == null) {
+//            return ResponseEntity
+//                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
+//                    .body(oAuth2Service.buildErrorResponse(user));
+//        } else {
+//            URI uri = URI.create("/");
+//            return ResponseEntity
+//                    .status(HttpStatus.FOUND)
+//                    .location(uri)
+//                    .build();
+//        }
     }
 
     @PostMapping("/register")
@@ -67,12 +85,13 @@ public class OAuth2Controller {
     }
 
     @GetMapping("/google/authenticate")
-    public ResponseEntity<Void> generateAuthUrl(HttpSession session) {
+    public ResponseEntity<String> generateAuthUrl(HttpSession session) {
         final String state = generateStateParameter();
         oAuth2SessionService.storeStateInSession(session, state);
 
         URI uri = googleOAuthService.buildAuthorizationUrl(state);
         log.info("Google auth url: {}", uri.toString());
-        return ResponseEntity.status(HttpStatus.FOUND).location(uri).build();
+        return ResponseEntity.ok(uri.toString());
+        //return ResponseEntity.status(HttpStatus.FOUND).location(uri).build();
     }
 }

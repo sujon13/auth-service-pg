@@ -1,6 +1,5 @@
 package example.demo.model;
 
-import jakarta.persistence.criteria.CriteriaBuilder;
 import lombok.*;
 
 @Getter

@@ -1,5 +1,6 @@
 package example.demo.controller;
 
+import example.demo.model.UserResponse;
 import example.demo.signup.model.User;
 import example.demo.model.UserRequest;
 import example.demo.service.UserService;
@@ -19,10 +20,15 @@ import java.util.Optional;
 public class UserController {
     private final UserService userService;
 
-    @RequestMapping(method = RequestMethod.GET, value = "")
+    @GetMapping("")
     //@GetMapping("/users")
     public ResponseEntity<List<User>> getUsers() {
         return ResponseEntity.ok(userService.getUsers());
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> me() {
+        return ResponseEntity.ok(userService.buildUserResponse());
     }
 
     @GetMapping("/{id}")

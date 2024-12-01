@@ -6,10 +6,12 @@ import example.demo.oauth.model.OAuthUserResponse;
 import example.demo.service.UserRoleService;
 import example.demo.service.UserService;
 import example.demo.service.auth.AuthenticationService;
+import example.demo.service.auth.CookieService;
 import example.demo.signup.enums.AccountType;
 import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -17,10 +19,12 @@ import org.springframework.util.StringUtils;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class OAuth2Service {
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final UserRoleService userRoleService;
+    private final CookieService cookieService;
 
     private User registerUser(OAuthUser oAuthUser) {
         User newUser = userService.createAndSaveUser(oAuthUser);
@@ -78,5 +82,10 @@ public class OAuth2Service {
         final String jwt = authenticationService.createAuthenticationToken(user);
         oAuthUserResponse.setMessage(jwt);
         return oAuthUserResponse;
+    }
+
+    public ResponseCookie getAuthCookie(final User user) {
+        final String jwt = authenticationService.createAuthenticationToken(user);
+        return cookieService.buildAuthCookie(jwt);
     }
 }

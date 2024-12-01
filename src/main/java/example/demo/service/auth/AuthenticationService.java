@@ -26,7 +26,7 @@ public class AuthenticationService {
         );
     }
 
-    public String createAuthenticationToken(User user) {
+    public String createAuthenticationToken(final User user) {
         List<String> roleList = userService.getRolesOfUser(user.getId());
         return jwtUtil.generateToken(user.getUsername(), roleList);
     }
@@ -34,7 +34,6 @@ public class AuthenticationService {
     public String createAuthenticationToken(AuthenticationRequest request) {
         authenticate(request);
 
-        //final UserDetails userDetails = userDetailsService.loadUserByUsername(request.getUsername());
         final User user = userService.getUserByUserName(request.getUserName()).orElseThrow();
         return createAuthenticationToken(user);
     }

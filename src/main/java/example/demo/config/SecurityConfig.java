@@ -54,6 +54,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify")
                             .hasRole("ADMIN")
+                        .requestMatchers(PREFIX + "/users/me").authenticated()
                         .requestMatchers(PREFIX + "/users/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/test").hasAnyRole("USER")
                         .anyRequest().authenticated()  // Secure other endpoints
@@ -72,6 +73,7 @@ public class SecurityConfig {
         config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedMethod(CorsConfiguration.ALL);
         config.addAllowedHeader(CorsConfiguration.ALL);
+        config.addExposedHeader("Location"); // Expose the Location header
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

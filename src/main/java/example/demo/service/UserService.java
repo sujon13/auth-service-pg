@@ -3,11 +3,13 @@ package example.demo.service;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
 import example.demo.model.UserRequest;
+import example.demo.model.UserResponse;
 import example.demo.oauth.model.OAuthUser;
 import example.demo.oauth.model.UserNameRequest;
 import example.demo.repository.UserRepository;
 import example.demo.service.auth.PasswordService;
 import example.demo.signup.model.User;
+import example.demo.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -30,6 +32,7 @@ public class UserService {
     private final RoleService roleService;
     private final UserRoleService userRoleService;
     private final PasswordService passwordService;
+    private final UserUtil userUtil;
 
     //@PreAuthorize("hasRole('ADMIN')")
     public List<User> getUsers() {
@@ -140,7 +143,6 @@ public class UserService {
                 .toList();
     }
 
-
     public void makeUserVerified(User user) {
         user.setVerified(true);
     }
@@ -149,6 +151,20 @@ public class UserService {
     public void makeUserVerified(final int userId) {
         User user = getUser(userId);
         makeUserVerified(user);
+    }
+
+    public UserResponse buildUserResponse(final User user) {
+        return UserResponse.builder()
+                .userId(user.getId())
+                .userName(user.getUsername())
+                .email(user.getEmail())
+                .build();
+    }
+
+    public UserResponse buildUserResponse() {
+        final String userName = userUtil.getUserName();
+        final User user = getUserByUserName(userName).orElseThrow();
+        return buildUserResponse(user);
     }
 
 }
