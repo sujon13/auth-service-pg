@@ -2,6 +2,8 @@ package example.demo.service.auth;
 
 import example.demo.signup.model.User;
 import example.demo.util.Constants;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
@@ -27,5 +29,13 @@ public class CookieService {
     public ResponseCookie buildAuthCookie(final User user) {
         final String jwtToken = authenticationService.createAuthenticationToken(user);
         return buildAuthCookie(jwtToken);
+    }
+
+    public Cookie clearAuthCookie(HttpServletResponse response) {
+        Cookie cookie = new Cookie(Constants.ACCESS_TOKEN, null);
+        cookie.setMaxAge(0);
+        cookie.setPath("/");
+        response.addCookie(cookie);
+        return cookie;
     }
 }

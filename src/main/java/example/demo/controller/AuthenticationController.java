@@ -4,6 +4,8 @@ import example.demo.model.AuthenticationRequest;
 import example.demo.service.auth.AuthenticationService;
 import example.demo.service.auth.CookieService;
 import example.demo.service.auth.PasswordService;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
@@ -20,11 +22,19 @@ public class AuthenticationController {
     private final CookieService cookieService;
 
     @PostMapping("/authenticate")
-    public ResponseEntity<Void> getAuthToken(@Valid @RequestBody AuthenticationRequest request) throws Exception {
+    public ResponseEntity<Void> getAuthToken(@Valid @RequestBody AuthenticationRequest request) {
         final String jwtToken = authenticationService.createAuthenticationToken(request);
         final ResponseCookie authCookie = cookieService.buildAuthCookie(jwtToken);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                .build();
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(HttpServletResponse response) {
+        final Cookie expiredAuthCookie = cookieService.clearAuthCookie(response);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, expiredAuthCookie.toString())
                 .build();
     }
 

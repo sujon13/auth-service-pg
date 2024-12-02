@@ -45,6 +45,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/hello", "/secure").permitAll() // Public endpoints
                         .requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll() //Public
+                        .requestMatchers(PREFIX + "/logout").authenticated()
+
                         .requestMatchers(PREFIX + "/oauth2/google/authenticate", PREFIX + "/oauth2/google/callback",
                                 PREFIX + "/oauth2/register").permitAll()
                         .requestMatchers(PREFIX + "/signup", "/error").permitAll() // Public endpoints
