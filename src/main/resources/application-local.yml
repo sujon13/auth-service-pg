@@ -33,3 +33,5 @@ oauth2:
     access-token-url: https://oauth2.googleapis.com/token
     user-info-url: https://openidconnect.googleapis.com/v1/userinfo
 
+    front-end-base-url: http://localhost:5173
+

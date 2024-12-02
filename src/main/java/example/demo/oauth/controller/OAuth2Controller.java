@@ -6,14 +6,13 @@ import example.demo.oauth.service.GoogleOAuthService;
 import example.demo.oauth.service.OAuth2Service;
 import example.demo.oauth.service.OAuth2SessionService;
 import example.demo.service.UserService;
-import example.demo.service.auth.AuthenticationService;
 import example.demo.service.auth.CookieService;
 import example.demo.signup.model.User;
-import example.demo.util.RandomUtil;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
@@ -27,13 +26,13 @@ import java.net.URI;
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/oauth2")
 public class OAuth2Controller {
+    @Value("${oauth2.google.front-end-base-url}")
+    private String frontEndBaseUrl;
 
     private final OAuth2Service oAuth2Service;
     private final GoogleOAuthService googleOAuthService;
     private final OAuth2SessionService oAuth2SessionService;
     private final UserService userService;
-    private final AuthenticationService authenticationService;
-    private final RandomUtil randomUtil;
     private final CookieService cookieService;
 
 
@@ -49,45 +48,46 @@ public class OAuth2Controller {
         }
 
         oAuth2SessionService.checkStateParam(session, callbackRequest.getState());
+        oAuth2SessionService.removeOAuthStateFromSession(session);
 
-        var user = googleOAuthService.authenticateUserWithGoogle(callbackRequest.getCode());
+        User user = googleOAuthService.authenticateUserWithGoogle(callbackRequest.getCode());
 
-        URI uri = URI.create("http://localhost:5173/");
-        final String jwt = authenticationService.createAuthenticationToken(user);
-        final ResponseCookie authCookie = cookieService.buildAuthCookie(jwt);
-        return ResponseEntity
-                .status(HttpStatus.FOUND)
-                .header(HttpHeaders.SET_COOKIE, authCookie.toString())
-                .location(uri)
-                .build();
-
-//        if (user.getUsername() == null) {
-//            return ResponseEntity
-//                    .status(HttpStatus.UNPROCESSABLE_ENTITY)
-//                    .body(oAuth2Service.buildErrorResponse(user));
-//        } else {
-//            URI uri = URI.create("/");
-//            return ResponseEntity
-//                    .status(HttpStatus.FOUND)
-//                    .location(uri)
-//                    .build();
-//        }
+        if (user.getUsername() == null) {
+            final String state = oAuth2SessionService.storeStateInSession(session);
+            final URI uri = oAuth2Service.buildCreateUserNamePath(user, state);
+            return ResponseEntity
+                    .status(HttpStatus.FOUND)
+                    .location(uri)
+                    .build();
+        } else {
+            final URI uri = URI.create(frontEndBaseUrl + "/");
+            final ResponseCookie authCookie = cookieService.buildAuthCookie(user);
+            return ResponseEntity
+                    .status(HttpStatus.FOUND)
+                    .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                    .location(uri)
+                    .build();
+        }
     }
 
     @PostMapping("/register")
-    public String registerUserName(@Valid @RequestBody UserNameRequest request) {
-        User user = userService.updateUserNameOfOAuthAccount(request);
-        return authenticationService.createAuthenticationToken(user);
-    }
+    public ResponseEntity<Void> registerUserName(@Valid @RequestBody UserNameRequest request, HttpSession session) {
+        oAuth2SessionService.checkStateParam(session, request.getState());
 
-    private String generateStateParameter() {
-        return randomUtil.getUUID();
+        User user = userService.updateUserNameOfOAuthAccount(request);
+
+        oAuth2SessionService.removeOAuthStateFromSession(session);
+
+        final ResponseCookie authCookie = cookieService.buildAuthCookie(user);
+        return ResponseEntity
+                .ok()
+                .header(HttpHeaders.SET_COOKIE, authCookie.toString())
+                .build();
     }
 
     @GetMapping("/google/authenticate")
     public ResponseEntity<String> generateAuthUrl(HttpSession session) {
-        final String state = generateStateParameter();
-        oAuth2SessionService.storeStateInSession(session, state);
+        final String state = oAuth2SessionService.storeStateInSession(session);
 
         URI uri = googleOAuthService.buildAuthorizationUrl(state);
         log.info("Google auth url: {}", uri.toString());

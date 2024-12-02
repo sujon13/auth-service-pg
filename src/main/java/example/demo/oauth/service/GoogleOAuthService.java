@@ -33,7 +33,6 @@ public class GoogleOAuthService {
     private final OAuth2Service oauth2Service;
     private final GoogleApiClient googleApiClient;
 
-
     public URI buildAuthorizationUrl(final String state) {
         return UriComponentsBuilder.fromHttpUrl(authorizationUrl)
                 .queryParam("client_id", clientId)

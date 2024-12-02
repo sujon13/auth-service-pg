@@ -1,5 +1,6 @@
 package example.demo.service;
 
+import example.demo.exception.EntryAlreadyExistsException;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
 import example.demo.model.UserRequest;
@@ -107,9 +108,17 @@ public class UserService {
         return newUser;
     }
 
+    private void checkUserNameExistence(final String userName) {
+        if (userRepository.existsByUserName(userName)) {
+            throw new EntryAlreadyExistsException("User Name " + userName + " is already taken.");
+        }
+    }
+
     @Transactional
     public User updateUserNameOfOAuthAccount(final UserNameRequest request) {
-        User user = getUser(request.getUserId());
+        checkUserNameExistence(request.getUserName());
+
+        final User user = getUser(request.getUserId());
         if (user.getAccountId().equals(request.getAccountId())) {
             user.setUserName(request.getUserName());
             makeUserVerified(user);

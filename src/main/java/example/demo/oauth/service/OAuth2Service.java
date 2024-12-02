@@ -11,20 +11,36 @@ import example.demo.signup.enums.AccountType;
 import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URI;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class OAuth2Service {
+    @Value("${oauth2.google.front-end-base-url}")
+    private String frontEndBaseUrl;
+
     private final UserService userService;
     private final AuthenticationService authenticationService;
     private final UserRoleService userRoleService;
     private final CookieService cookieService;
+
+    public URI buildCreateUserNamePath(final User user, final String state) {
+        return UriComponentsBuilder.fromHttpUrl(frontEndBaseUrl + "/createusername")
+                .queryParam("userId", user.getId())
+                .queryParam("accountId", user.getAccountId())
+                .queryParam("state", state)
+                .build()
+                .toUri();
+    }
 
     private User registerUser(OAuthUser oAuthUser) {
         User newUser = userService.createAndSaveUser(oAuthUser);

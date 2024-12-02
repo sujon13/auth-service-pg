@@ -75,4 +75,12 @@ public class CustomExceptionHandler {
                 .body(ex.getMessage());
     }
 
+    @ExceptionHandler(EntryAlreadyExistsException.class)
+    public ResponseEntity<String> handleEntryAlreadyExistException(EntryAlreadyExistsException ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ex.getMessage());
+    }
+
 }

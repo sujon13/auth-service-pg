@@ -21,6 +21,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
@@ -69,9 +70,10 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        final Optional<User> optionalUser = userService.getUserByUserName(username);
+        if (optionalUser.isPresent() && SecurityContextHolder.getContext().getAuthentication() == null) {
+            final User user = optionalUser.get();
 
-            User user = userService.getUserByUserName(username).orElseThrow();
             if (jwtUtil.validateToken(jwt, user.getUsername())) {
                 List<? extends GrantedAuthority> authorities = jwtUtil.extractRoles(jwt);
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(

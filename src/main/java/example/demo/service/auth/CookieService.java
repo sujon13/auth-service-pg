@@ -1,6 +1,8 @@
 package example.demo.service.auth;
 
+import example.demo.signup.model.User;
 import example.demo.util.Constants;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseCookie;
 import org.springframework.stereotype.Service;
@@ -9,7 +11,10 @@ import java.time.Duration;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CookieService {
+    private final AuthenticationService authenticationService;
+
     public ResponseCookie buildAuthCookie(final String jwtToken) {
         return ResponseCookie.from(Constants.ACCESS_TOKEN, jwtToken)
                 .httpOnly(true)   // Make the cookie inaccessible from JS
@@ -17,5 +22,10 @@ public class CookieService {
                 .path("/")        // Set the cookie's path (domain)
                 .maxAge(Duration.ofMinutes(30)) // Cookie expiration
                 .build();
+    }
+
+    public ResponseCookie buildAuthCookie(final User user) {
+        final String jwtToken = authenticationService.createAuthenticationToken(user);
+        return buildAuthCookie(jwtToken);
     }
 }

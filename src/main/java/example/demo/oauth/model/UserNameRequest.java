@@ -23,4 +23,6 @@ public class UserNameRequest {
     @Length(min = 3, max = 20)
     @Pattern(regexp = Constants.USER_NAME_REGEXP, message = Constants.USER_NAME_ERROR_MESSAGE)
     private String userName;
+
+    private String state;
 }
