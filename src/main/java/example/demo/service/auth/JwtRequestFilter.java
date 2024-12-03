@@ -1,5 +1,6 @@
 package example.demo.service.auth;
 
+import example.demo.config.SecurityConfig;
 import example.demo.service.UserService;
 import example.demo.signup.model.User;
 import example.demo.util.Constants;
@@ -50,9 +51,22 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return null;
     }
 
+    private boolean isPublicEndpoint(final HttpServletRequest request) {
+        final String requestPath = request.getRequestURI();
+        return SecurityConfig.getPublicEndpoints()
+                .stream()
+                .anyMatch(pattern -> requestPath.matches(pattern.replace("**", ".*")));
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
+
+        if (isPublicEndpoint(request)) {
+            // Skip token validation for public endpoints
+            chain.doFilter(request, response);
+            return;
+        }
 
         String jwt = extractJwtToken(request);
         if (jwt == null) {

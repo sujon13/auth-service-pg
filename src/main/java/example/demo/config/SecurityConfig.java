@@ -16,6 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -26,16 +28,28 @@ public class SecurityConfig {
 
     private final JwtRequestFilter jwtRequestFilter;
 
-//    @Bean
-//    public JwtRequestFilter jwtRequestFilter(UserDetailsService userDetailsService) {
-//        return new JwtRequestFilter(userDetailsService);
-//    }
-//
-//    @Bean
-//    public AuthenticationProvider customAuthenticationProvider() {
-//        return new CustomAuthenticationProvider();
-//    }
+    private static final List<String> PUBLIC_ENDPOINTS = List.of(
+            "/hello",
+            "/secure",
 
+            PREFIX + "/authenticate", // login
+            PREFIX + "/password",
+
+            PREFIX + "/oauth2/google/authenticate",
+            PREFIX + "/oauth2/google/callback",
+            PREFIX + "/oauth2/register",
+
+            PREFIX + "/signup",
+            PREFIX + "/signup/checkUserName",
+            PREFIX + "/signup/send-otp",
+            PREFIX + "/signup/verify-otp",
+
+            "/error"
+    );
+
+    public static List<String> getPublicEndpoints() {
+        return PUBLIC_ENDPOINTS;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -43,15 +57,17 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/hello", "/secure").permitAll() // Public endpoints
-                        .requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll() //Public
+                        .requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
+
+                        //.requestMatchers("/hello", "/secure").permitAll()
+                        //.requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll()
                         .requestMatchers(PREFIX + "/logout").authenticated()
 
-                        .requestMatchers(PREFIX + "/oauth2/google/authenticate", PREFIX + "/oauth2/google/callback",
-                                PREFIX + "/oauth2/register").permitAll()
-                        .requestMatchers(PREFIX + "/signup", "/error").permitAll() // Public endpoints
-                        .requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
-                        .requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
+                        //.requestMatchers(PREFIX + "/oauth2/google/authenticate", PREFIX + "/oauth2/google/callback",
+                        //        PREFIX + "/oauth2/register").permitAll()
+                        //.requestMatchers(PREFIX + "/signup", "/error").permitAll()
+                        //.requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
+                        //.requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
                         .requestMatchers(HttpMethod.GET, PREFIX + "/users").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify")
