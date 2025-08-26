@@ -1,6 +1,5 @@
 package example.demo.signup.service;
 
-import example.demo.enums.RoleEnum;
 import example.demo.model.UserRequest;
 import example.demo.repository.UserRepository;
 import example.demo.service.UserRoleService;
@@ -17,9 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -66,30 +63,21 @@ public class SignupService {
         return userRepository.existsByUserName(userName);
     }
 
-    public Map<String, String> checkUserNameAndPasswordUniqueness(SignupRequest signupRequest) {
-        Map<String, String> errorMap = new HashMap<>();
-        Optional<User> optionalUser = userRepository.findByUserNameOrEmail(signupRequest.getUserName(), signupRequest.getEmail());
-        if (optionalUser.isEmpty()) {
-            return errorMap;
-        }
-        User user = optionalUser.get();
+    public boolean emailAlreadyExists(String email) {
+       return userRepository.existsByEmail(email);
+    }
 
-        if (user.getUsername().equals(signupRequest.getUserName())) {
-            errorMap.put("userName", "username already exists");
-        }
-        if (user.getEmail().equals(signupRequest.getEmail())) {
-            errorMap.put("email", "email already exists");
-        }
-        return errorMap;
+    private String extractUserNameFromEmail(String email) {
+        return email.split("@")[0];
     }
 
     private User createUserFromRequest(SignupRequest signupRequest) {
         User user = new User();
-        user.setUserName(signupRequest.getUserName());
+        //user.setUserName(extractUserNameFromEmail(signupRequest.getEmail()));
         user.setEmail(signupRequest.getEmail());
         user.setName(signupRequest.getName());
         user.setPassword(passwordService.encode(signupRequest.getRawPassword()));
-        user.setCreatedBy(user.getUsername());
+        //user.setCreatedBy(user.getUsername());
         return user;
     }
 
@@ -116,7 +104,6 @@ public class SignupService {
         User newUser = createUserFromRequest(signupRequest);
         return saveUser(newUser)
                 .stream()
-                .peek(user -> userRoleService.assignUserRole(user.getId()))
                 .map(this::createSignupResponse)
                 .findAny();
     }
@@ -160,7 +147,7 @@ public class SignupService {
 
         Optional<User> optionalUser = userRepository.findById(otpRequest.getUserId());
         if (optionalUser.isPresent()) {
-            userService.makeUserVerified(optionalUser.get());
+            userService.verifyEmail(optionalUser.get());
             otpService.makeOtpUsed(otpRequest.getId());
         } else {
             otpValidation = OtpValidation.USER_NOT_FOUND;

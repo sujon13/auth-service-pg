@@ -1,5 +1,6 @@
 package example.demo.model;
 
+import example.demo.enums.RoleEnum;
 import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,9 +10,11 @@ import lombok.Setter;
 @Setter
 @Builder
 public class UserRequest {
-    @NotNull
     private String userName;
+    private String email;
     private String name;
-    //@NotNull
     private String rawPassword;
+    private Boolean isEmailVerified;
+    private Boolean isVerified;
+    private RoleEnum role;
 }

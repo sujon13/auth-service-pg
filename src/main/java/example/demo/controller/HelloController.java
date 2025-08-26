@@ -3,6 +3,7 @@ package example.demo.controller;
 import example.demo.model.UserResponseDto;
 import example.demo.service.ApiCallService;
 import example.demo.service.IDemoService;
+import example.demo.service.auth.PasswordService;
 import example.demo.service.auth.SecurityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;

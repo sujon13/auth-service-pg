@@ -16,20 +16,23 @@ import org.hibernate.validator.constraints.Length;
 @Builder
 @PasswordMatcher
 public class SignupRequest {
-    @NotBlank
-    @Length(min = 3, max = 20)
-    @Pattern(regexp = Constants.USER_NAME_REGEXP, message = Constants.USER_NAME_ERROR_MESSAGE)
-    private String userName;
+    //@NotBlank
+    //@Length(min = 3, max = 20)
+    //@Pattern(regexp = Constants.USER_NAME_REGEXP, message = Constants.USER_NAME_ERROR_MESSAGE)
+    //private String userName;
 
     @NotBlank
     @Email
     private String email;
+
+    @NotBlank
     @Length(max = 128)
     private String name;
 
     @NotBlank
     @Pattern(regexp = Constants.PASSWORD_REGEXP, message = Constants.PASSWORD_ERROR_MESSAGE)
     private String rawPassword;
+
     @NotBlank
     private String reTypeRawPassword;
 }

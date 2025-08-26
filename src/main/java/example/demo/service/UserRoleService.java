@@ -42,9 +42,6 @@ public class UserRoleService {
         return userRoleRepository.save(userRole);
     }
 
-    public UserRole assignUserRole(final int userId) {
-        return assign(userId, RoleEnum.USER);
-    }
 
     @Transactional
     public UserRole assign(final UserRoleRequest request) {

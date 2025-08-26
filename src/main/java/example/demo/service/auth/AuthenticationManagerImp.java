@@ -1,6 +1,7 @@
 package example.demo.service.auth;
 
 import example.demo.exception.EmailNotVerifiedException;
+import example.demo.exception.NotVerifiedException;
 import example.demo.service.UserService;
 import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
@@ -36,10 +37,16 @@ public class AuthenticationManagerImp implements AuthenticationManager {
             throw new BadCredentialsException("Username or Password is Wrong!");
         }
 
-        if (!user.isVerified()) {
+        if (!user.isEmailVerified()) {
             log.error("Email is not verified for user {}", authentication.getName());
             throw new EmailNotVerifiedException("Email is not verified");
         }
+
+        if (!user.isVerified()) {
+            log.error("User {} is not verified", authentication.getName());
+            throw new NotVerifiedException("User is not verified");
+        }
+
         return authentication;
     }
 }

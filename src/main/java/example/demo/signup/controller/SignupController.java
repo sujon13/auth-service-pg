@@ -2,6 +2,7 @@ package example.demo.signup.controller;
 
 import example.demo.model.UserRequest;
 import example.demo.service.UserService;
+import example.demo.service.auth.PasswordService;
 import example.demo.signup.enums.OtpValidation;
 import example.demo.signup.model.*;
 import example.demo.signup.service.SignupService;
@@ -22,6 +23,7 @@ import java.util.Map;
 public class SignupController {
     private final UserService userService;
     private final SignupService signupService;
+    private final PasswordService passwordService;
 
     @RequestMapping(method = RequestMethod.GET, value = "")
     //@GetMapping("/users")
@@ -50,9 +52,8 @@ public class SignupController {
 
     @PostMapping("")
     public ResponseEntity<?> signup(@Valid @RequestBody SignupRequest signupRequest) {
-        Map<String, String> errorMap = signupService.checkUserNameAndPasswordUniqueness(signupRequest);
-        if (!errorMap.isEmpty()) {
-            return ResponseEntity.badRequest().body(errorMap);
+        if (signupService.emailAlreadyExists(signupRequest.getEmail())) {
+            return ResponseEntity.badRequest().body("Email already exists");
         }
 
         return signupService.signup(signupRequest)

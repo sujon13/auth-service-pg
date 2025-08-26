@@ -1,5 +1,6 @@
 package example.demo.service;
 
+import example.demo.enums.RoleEnum;
 import example.demo.exception.EntryAlreadyExistsException;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
@@ -57,17 +58,35 @@ public class UserService {
         return userRepository.findByUserName(userName);
     }
 
+    private void updateUser(User user, UserRequest userRequest) {
+        user.setName(userRequest.getName());
+    }
+
+
     @Transactional
-    @PreAuthorize("#userName == authentication.name")
-    public Optional<User> updateUser(String userName, UserRequest userRequest) {
-        Optional<User> optionalUser = userRepository.findByUserName(userName);
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    //@PreAuthorize("#userName == authentication.name")
+    public Optional<User> updateUser(final int userId, UserRequest userRequest) {
+        Optional<User> optionalUser = userRepository.findById(userId);
 
         if (optionalUser.isPresent()) {
-            optionalUser.get().setName(userRequest.getName());
+            updateUser(optionalUser.get(), userRequest);
             return optionalUser;
         } else {
-            log.error("User not found with userName: " + userName);
+            log.error("User not found with userId: {}", userId);
+            return Optional.empty();
+        }
+    }
+
+    @Transactional
+    //@PreAuthorize("#userName == authentication.name")
+    public Optional<User> updateUser(final String userName, UserRequest userRequest) {
+        Optional<User> optionalUser = userRepository.findByUserName(userName);
+
+        if (optionalUser.isPresent()) {
+            updateUser(optionalUser.get(), userRequest);
+            return optionalUser;
+        } else {
+            log.error("User not found with userName: {}", userName);
             return Optional.empty();
         }
     }
@@ -121,7 +140,7 @@ public class UserService {
         final User user = getUser(request.getUserId());
         if (user.getAccountId().equals(request.getAccountId())) {
             user.setUserName(request.getUserName());
-            makeUserVerified(user);
+            verifyEmail(user);
             return user;
         } else {
             final String errorMessage = "AccountId does not match";
@@ -152,14 +171,24 @@ public class UserService {
                 .toList();
     }
 
-    public void makeUserVerified(User user) {
+    public void verifyEmail(User user) {
+        user.setEmailVerified(true);
+    }
+
+    @Transactional
+    public void verifyEmail(final int userId) {
+        User user = getUser(userId);
+        verifyEmail(user);
+    }
+
+    public void verifyUser(User user) {
         user.setVerified(true);
     }
 
     @Transactional
-    public void makeUserVerified(final int userId) {
+    public void verifyUser(final int userId) {
         User user = getUser(userId);
-        makeUserVerified(user);
+        verifyUser(user);
     }
 
     public UserResponse buildUserResponse(final User user) {
@@ -174,6 +203,56 @@ public class UserService {
         final String userName = userUtil.getUserName();
         final User user = getUserByUserName(userName).orElseThrow();
         return buildUserResponse(user);
+    }
+
+    private void convertUserFromRequest(User user, UserRequest request) {
+        if (request.getUserName() != null)
+            user.setUserName(request.getUserName());
+        if (request.getEmail() != null)
+            user.setEmail(request.getEmail());
+        if (request.getName() != null)
+            user.setName(request.getName());
+        if (request.getRawPassword() != null)
+            user.setPassword(passwordService.encode(request.getRawPassword()));
+        if (request.getIsEmailVerified() != null)
+            user.setEmailVerified(request.getIsEmailVerified());
+        if (request.getIsVerified() != null)
+            user.setVerified(request.getIsVerified());
+    }
+
+    private void updateRole(final int userId, UserRequest userRequest) {
+        if (userRequest.getRole() != null)
+            userRoleService.assign(userId, userRequest.getRole());
+    }
+
+    private Optional<User> saveUserByAdmin(User user, UserRequest userRequest) {
+        try {
+            convertUserFromRequest(user, userRequest);
+            user = userRepository.save(user);
+            updateRole(user.getId(), userRequest);
+            return Optional.of(user);
+        } catch (Exception e) {
+            log.error("Error creating user: {}", e.getMessage());
+            return Optional.empty();
+        }
+    }
+
+    @Transactional
+    //@PreAuthorize("hasRole('ADMIN')")
+    public Optional<User> createUserByAdmin(UserRequest userRequest) {
+        return saveUserByAdmin(new User(), userRequest);
+    }
+
+    @Transactional
+    //@PreAuthorize("hasRole('ADMIN')")
+    public Optional<User> updateUserByAdmin(final int userId, UserRequest userRequest) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isPresent()) {
+            return saveUserByAdmin(optionalUser.get(), userRequest);
+        } else {
+            log.error("User not found with id: " + userId);
+            return Optional.empty();
+        }
     }
 
 }

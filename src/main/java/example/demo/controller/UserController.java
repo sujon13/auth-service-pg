@@ -4,6 +4,7 @@ import example.demo.model.UserResponse;
 import example.demo.signup.model.User;
 import example.demo.model.UserRequest;
 import example.demo.service.UserService;
+import example.demo.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @RequestMapping("/api/v1/users")
 public class UserController {
     private final UserService userService;
+    private final UserUtil userUtil;
 
     @GetMapping("")
     //@GetMapping("/users")
@@ -42,23 +44,24 @@ public class UserController {
         return ResponseEntity.ok(userService.getUser(id));
     }
 
-    @PostMapping("/{userName}")
-    public ResponseEntity<User> updateUser(@PathVariable String userName,
+    @PostMapping("/{id}")
+    public ResponseEntity<User> updateUser(@PathVariable final int id,
                                            @RequestBody UserRequest userRequest) {
 
-        if (userName == null) {
-            log.error("bad request");
-            return ResponseEntity.badRequest().build();
-        }
-
-        return userService.updateUser(userName, userRequest)
+        Optional<User> optionalUser = userUtil.isAdmin()
+                ? userService.updateUserByAdmin(id, userRequest)
+                : userService.updateUser(id, userRequest);
+        return optionalUser
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping("")
     public ResponseEntity<User> createUser(@RequestBody UserRequest userRequest) {
-        return userService.saveUser(userRequest)
+        Optional<User> optionalUser = userUtil.isAdmin()
+                ? userService.createUserByAdmin(userRequest)
+                : userService.saveUser(userRequest);
+        return optionalUser
                 .map(user -> new ResponseEntity<>(user, HttpStatus.CREATED))
                 .orElse(ResponseEntity.internalServerError().build());
     }
@@ -79,7 +82,14 @@ public class UserController {
     }
 
     @PostMapping("/{id}/verify")
-    public void verify(@PathVariable("id") final int userId) {
-        userService.makeUserVerified(userId);
+    public void verifyByAdmin(@PathVariable("id") final int userId) {
+        userService.verifyUser(userId);
     }
+
+    @PostMapping("/{id}/verify/email")
+    public void verifyEmail(@PathVariable("id") final int userId) {
+        userService.verifyEmail(userId);
+    }
+
+
 }

@@ -1,6 +1,7 @@
 package example.demo.oauth.service;
 
 
+import example.demo.enums.RoleEnum;
 import example.demo.oauth.model.OAuthUser;
 import example.demo.oauth.model.OAuthUserResponse;
 import example.demo.service.UserRoleService;
@@ -44,7 +45,7 @@ public class OAuth2Service {
 
     private User registerUser(OAuthUser oAuthUser) {
         User newUser = userService.createAndSaveUser(oAuthUser);
-        userRoleService.assignUserRole(newUser.getId());
+        //userRoleService.assign(newUser.getId(), RoleEnum.);
         return newUser;
     }
 

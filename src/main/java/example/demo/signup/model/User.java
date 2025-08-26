@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import example.demo.signup.AccountTypeConverter;
 import example.demo.signup.enums.AccountType;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -20,7 +21,7 @@ import java.util.Collection;
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_user_name", columnList = "user_name"),
         @Index(name = "idx_users_email", columnList = "email"),
-        @Index(name = "idx_users_account_id", columnList = "account_id"),
+        //@Index(name = "idx_users_account_id", columnList = "account_id"),
 })
 @NoArgsConstructor
 @AllArgsConstructor
@@ -52,11 +53,15 @@ public class User implements UserDetails {
     @JsonIgnore
     private String password;
 
+    @NotBlank
     @Column(name = "name")
     private String name;
 
-    @Column
-    private boolean verified = false;
+    @Column(name = "is_email_verified")
+    private boolean isEmailVerified = false;
+
+    @Column(name = "is_verified")
+    private boolean isVerified = false;
 
     //@CreatedBy
     @Column(name = "created_by", updatable = false)

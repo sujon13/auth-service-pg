@@ -1,13 +1,11 @@
 package example.demo.model;
 
-import example.demo.enums.RoleEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Setter
 @Getter
@@ -28,5 +26,5 @@ public class UserRole {
 
     @NotNull
     @Column(name = "role_id")
-    private Integer roleId = RoleEnum.USER.getId();
+    private Integer roleId;
 }
