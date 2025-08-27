@@ -1,10 +1,8 @@
 package example.demo.service.auth;
 
-import example.demo.service.UserService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -49,9 +47,10 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return (Claims) Jwts.parser()
+        JwtParser parser = Jwts.parser()
                 .verifyWith(secretKey())
-                .build()
+                .build();
+        return (Claims) parser
                 .parse(token)
                 .getPayload();
     }
@@ -61,11 +60,12 @@ public class JwtUtil {
     }
 
     public String generateToken(String username, List<String> roleList) {
+        int expirationTimeInMinutes = 30;
         return Jwts.builder()
                 .claim(AUTHORITIES, roleList)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 30))
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * expirationTimeInMinutes))
                 //.signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .signWith(secretKey())
                 .compact();

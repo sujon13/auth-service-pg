@@ -82,5 +82,4 @@ public class CustomExceptionHandler {
                 .status(HttpStatus.CONFLICT)
                 .body(ex.getMessage());
     }
-
 }
