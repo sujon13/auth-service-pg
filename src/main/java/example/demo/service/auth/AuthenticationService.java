@@ -22,7 +22,7 @@ public class AuthenticationService {
 
     private void authenticate(AuthenticationRequest request) {
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getUserName(), request.getPassword())
+                new UsernamePasswordAuthenticationToken(request.getUserNameOrEmail(), request.getPassword())
         );
     }
 
@@ -34,7 +34,7 @@ public class AuthenticationService {
     public String createAuthenticationToken(AuthenticationRequest request) {
         authenticate(request);
 
-        final User user = userService.getUserByUserName(request.getUserName()).orElseThrow();
+        final User user = userService.findByUserNameOrEmail(request.getUserNameOrEmail()).orElseThrow();
         return createAuthenticationToken(user);
     }
 }

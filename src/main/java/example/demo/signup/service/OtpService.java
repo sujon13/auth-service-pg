@@ -70,7 +70,7 @@ public class OtpService {
                 It is valid for the next 3 minutes. Please do not share it with others.<br><br>
                 Thank you.<br><br>
                 Regards,<br>
-                Live Exam IT team
+                IT team
                 """;
         final String body = String.format(bodyTemplate, otp);
         return EmailRequest.builder()

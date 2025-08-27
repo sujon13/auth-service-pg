@@ -55,7 +55,15 @@ public class CustomExceptionHandler {
     public ResponseEntity<String> handleEmailNotVerifiedException(EmailNotVerifiedException ex) {
         log.error(ex.getMessage());
         return ResponseEntity
-                .status(HttpStatus.FORBIDDEN)
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(NotVerifiedException.class)
+    public ResponseEntity<String> handleNotVerifiedException(NotVerifiedException ex) {
+        log.error(ex.getMessage());
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
                 .body(ex.getMessage());
     }
 

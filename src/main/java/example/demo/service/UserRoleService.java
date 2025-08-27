@@ -29,6 +29,12 @@ public class UserRoleService {
                 .toList();
     }
 
+    private boolean isRoleExists(final int userId, final RoleEnum role) {
+        return retrieveUserRoles(userId)
+                .stream()
+                .anyMatch(userRole -> userRole.getRoleId() == role.getId());
+    }
+
     private UserRole createUserRole(final int userId, final RoleEnum role) {
         final UserRole userRole = new UserRole();
         userRole.setUserId(userId);
@@ -38,10 +44,12 @@ public class UserRoleService {
 
     @Transactional
     public UserRole assign(final int userId, final RoleEnum role) {
-        final UserRole userRole = createUserRole(userId, role);
-        return userRoleRepository.save(userRole);
+        if (!isRoleExists(userId, role)) {
+            final UserRole userRole = createUserRole(userId, role);
+            return userRoleRepository.save(userRole);
+        }
+        return null;
     }
-
 
     @Transactional
     public UserRole assign(final UserRoleRequest request) {

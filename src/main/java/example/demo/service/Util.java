@@ -15,4 +15,8 @@ public class Util {
             return 1;
         else return 0;
     }
+
+    public static boolean isEmail(String input) {
+        return input.contains("@");
+    }
 }

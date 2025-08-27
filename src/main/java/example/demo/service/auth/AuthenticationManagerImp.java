@@ -3,6 +3,7 @@ package example.demo.service.auth;
 import example.demo.exception.EmailNotVerifiedException;
 import example.demo.exception.NotVerifiedException;
 import example.demo.service.UserService;
+import example.demo.service.Util;
 import example.demo.signup.model.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,16 +26,22 @@ public class AuthenticationManagerImp implements AuthenticationManager {
     @Override
     public Authentication authenticate(Authentication authentication) throws AuthenticationException {
         String rawPassword = authentication.getCredentials().toString();
-        Optional<User> optionalUser = userService.getUserByUserName(authentication.getName());
+        Optional<User> optionalUser = userService.findByUserNameOrEmail(authentication.getName());
         if (optionalUser.isEmpty()) {
-            log.error("User not found with name {}", authentication.getName());
-            throw new BadCredentialsException("Username or Password is Wrong!");
+            boolean isEmail = Util.isEmail(authentication.getName());
+            if (isEmail) {
+                log.error("Email {} not found", authentication.getName());
+                throw new BadCredentialsException("Email or Password is Wrong!");
+            } else {
+                log.error("UserName {} not found", authentication.getName());
+                throw new BadCredentialsException("UserName or Password is Wrong!");
+            }
         }
 
         User user = optionalUser.get();
         if (!passwordEncoder.matches(rawPassword, user.getPassword())) {
             log.error("password does not match for user {}", authentication.getName());
-            throw new BadCredentialsException("Username or Password is Wrong!");
+            throw new BadCredentialsException("UserName/Email or Password is Wrong!");
         }
 
         if (!user.isEmailVerified()) {

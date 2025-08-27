@@ -10,6 +10,6 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthenticationRequest {
-    private String userName;
+    private String userNameOrEmail;
     private String password;
 }

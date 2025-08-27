@@ -1,6 +1,5 @@
 package example.demo.service;
 
-import example.demo.enums.RoleEnum;
 import example.demo.exception.EntryAlreadyExistsException;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
@@ -16,9 +15,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +52,13 @@ public class UserService {
 
     public Optional<User> getUserByUserName(String userName) {
         return userRepository.findByUserName(userName);
+    }
+
+    public Optional<User> findByUserNameOrEmail(final String userNameOrEmail) {
+        boolean isEmail = Util.isEmail(userNameOrEmail);
+        return isEmail
+                ? userRepository.findByEmail(userNameOrEmail)
+                : userRepository.findByUserName(userNameOrEmail);
     }
 
     private void updateUser(User user, UserRequest userRequest) {
