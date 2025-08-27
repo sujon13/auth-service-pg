@@ -1,5 +1,7 @@
 package example.demo.exception;
 
+import example.demo.enums.ExceptionEnum;
+import example.demo.model.ExceptionResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -60,11 +62,13 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(NotVerifiedException.class)
-    public ResponseEntity<String> handleNotVerifiedException(NotVerifiedException ex) {
+    public ResponseEntity<ExceptionResponse> handleNotVerifiedException(NotVerifiedException ex) {
         log.error(ex.getMessage());
+        ExceptionResponse response =
+                new ExceptionResponse(ex.getMessage(), ExceptionEnum.NotVerifiedException.getId());
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(ex.getMessage());
+                .body(response);
     }
 
     @ExceptionHandler(NotFoundException.class)
