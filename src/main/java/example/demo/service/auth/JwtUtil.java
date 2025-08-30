@@ -1,5 +1,6 @@
 package example.demo.service.auth;
 
+import example.demo.util.Constants;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
@@ -11,13 +12,13 @@ import org.springframework.stereotype.Component;
 import javax.crypto.SecretKey;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Component
 public class JwtUtil {
     private static final String SECRET_KEY = "gbfddbhghrethy485tgergbvdjfbgjeyty34t5yreughfdbjgdfthy4835398wtghdsfgsfls";
-    private static final String AUTHORITIES = "authorities";
 
 
     public String extractUsername(String token) {
@@ -25,7 +26,7 @@ public class JwtUtil {
     }
 
     public List<? extends GrantedAuthority> extractRoles(String token) {
-        List<?> rawRoleList = extractClaim(token, (Claims claims) -> claims.get(AUTHORITIES, List.class));
+        List<?> rawRoleList = extractClaim(token, (Claims claims) -> claims.get(Constants.AUTHORITIES, List.class));
         // Cast each element to GrantedAuthority and collect to a new list
         return rawRoleList.stream()
                 .map(String.class::cast)
@@ -60,10 +61,11 @@ public class JwtUtil {
         return extractExpiration(token).before(new Date());
     }
 
-    public String generateToken(String username, List<String> roleList) {
+    public String generateToken(String username, List<String> roleList, Map<String, Object> claims) {
         final int expirationTimeInMinutes = 1440; // 24 hours
         return Jwts.builder()
-                .claim(AUTHORITIES, roleList)
+                //.claim(Constants.AUTHORITIES, roleList)
+                .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * expirationTimeInMinutes))

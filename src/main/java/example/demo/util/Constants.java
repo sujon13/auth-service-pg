@@ -13,4 +13,7 @@ public class Constants {
                     "one digit";
 
     public static final String ACCESS_TOKEN = "accessToken";
+
+    public static final String AUTHORITIES = "authorities";
+    public static final String NAME = "name";
 }
