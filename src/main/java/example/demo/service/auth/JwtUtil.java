@@ -1,8 +1,9 @@
 package example.demo.service.auth;
 
-import io.jsonwebtoken.*;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtParser;
+import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
@@ -60,7 +61,7 @@ public class JwtUtil {
     }
 
     public String generateToken(String username, List<String> roleList) {
-        int expirationTimeInMinutes = 30;
+        final int expirationTimeInMinutes = 1440; // 24 hours
         return Jwts.builder()
                 .claim(AUTHORITIES, roleList)
                 .subject(username)
