@@ -3,6 +3,7 @@ package example.demo.service;
 import example.demo.exception.EntryAlreadyExistsException;
 import example.demo.exception.NotFoundException;
 import example.demo.model.Role;
+import example.demo.model.UserDropdown;
 import example.demo.model.UserRequest;
 import example.demo.model.UserResponse;
 import example.demo.oauth.model.OAuthUser;
@@ -10,6 +11,7 @@ import example.demo.oauth.model.UserNameRequest;
 import example.demo.repository.UserRepository;
 import example.demo.service.auth.PasswordService;
 import example.demo.signup.model.User;
+import example.demo.util.Constants;
 import example.demo.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 @Service
 @RequiredArgsConstructor
@@ -35,6 +38,10 @@ public class UserService {
     //@PreAuthorize("hasRole('ADMIN')")
     public List<User> getUsers() {
         return userRepository.findAll();
+    }
+
+    public List<User> findAllVerifiedUsers() {
+        return userRepository.findAllVerifiedUsers();
     }
 
     public Optional<User> findById(final int id) {
@@ -256,6 +263,24 @@ public class UserService {
             log.error("User not found with id: " + userId);
             return Optional.empty();
         }
+    }
+
+    // util
+    private UserDropdown buildDropdown(final User user) {
+        return UserDropdown.builder()
+                .username(user.getUsername())
+                .name(user.getName())
+                .build();
+    }
+
+    public List<UserDropdown> getUserDropdowns() {
+        final String selfUserName = userUtil.getUserName();
+        Predicate<User> isAdminOrSelf = user -> user.getUsername().equals(Constants.ADMIN) || user.getUsername().equals(selfUserName);
+        return findAllVerifiedUsers()
+                .stream()
+                .filter(user -> !isAdminOrSelf.test(user))
+                .map(this::buildDropdown)
+                .toList();
     }
 
 }

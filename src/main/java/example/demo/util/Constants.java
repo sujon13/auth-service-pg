@@ -16,4 +16,5 @@ public class Constants {
 
     public static final String AUTHORITIES = "authorities";
     public static final String NAME = "name";
+    public static final String ADMIN = "admin";
 }

@@ -1,9 +1,10 @@
 package example.demo.controller;
 
-import example.demo.model.UserResponse;
-import example.demo.signup.model.User;
+import example.demo.model.UserDropdown;
 import example.demo.model.UserRequest;
+import example.demo.model.UserResponse;
 import example.demo.service.UserService;
+import example.demo.signup.model.User;
 import example.demo.util.UserUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -91,5 +92,9 @@ public class UserController {
         userService.verifyEmail(userId);
     }
 
+    @GetMapping("/dropdown")
+    public List<UserDropdown> getVerifiedUsers() {
+        return userService.getUserDropdowns();
+    }
 
 }

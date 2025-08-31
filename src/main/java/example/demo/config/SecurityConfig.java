@@ -72,7 +72,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify")
                             .hasRole("ADMIN")
-                        .requestMatchers(PREFIX + "/users/me").authenticated()
+                        .requestMatchers(PREFIX + "/users/me", PREFIX + "/users/dropdown").authenticated()
                         .requestMatchers(PREFIX + "/users/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/test").hasAnyRole("USER")
                         .anyRequest().authenticated()  // Secure other endpoints
