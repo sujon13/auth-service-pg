@@ -10,6 +10,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -62,13 +63,12 @@ public class JwtUtil {
     }
 
     public String generateToken(String username, List<String> roleList, Map<String, Object> claims) {
-        final int expirationTimeInMinutes = 1440; // 24 hours
         return Jwts.builder()
                 //.claim(Constants.AUTHORITIES, roleList)
                 .claims(claims)
                 .subject(username)
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * expirationTimeInMinutes))
+                .expiration(Date.from(new Date().toInstant().plus(Constants.TOKEN_EXPIRATION_TIME_IN_DAYS, ChronoUnit.DAYS)))
                 //.signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .signWith(secretKey())
                 .compact();

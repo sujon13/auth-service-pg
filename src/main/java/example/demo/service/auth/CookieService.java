@@ -22,7 +22,7 @@ public class CookieService {
                 .httpOnly(true)   // Make the cookie inaccessible from JS
                 .secure(false)     // Ensure the cookie is only sent over HTTPS
                 .path("/")        // Set the cookie's path (domain)
-                .maxAge(Duration.ofMinutes(30)) // Cookie expiration
+                .maxAge(Duration.ofDays(Constants.COOKIE_EXPIRATION_TIME_IN_DAYS)) // Cookie expiration
                 .build();
     }
 
