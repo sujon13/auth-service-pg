@@ -10,5 +10,6 @@ import lombok.Setter;
 public class UserResponse {
     private int userId;
     private String userName;
+    private String name;
     private String email;
 }

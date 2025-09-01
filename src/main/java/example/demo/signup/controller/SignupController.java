@@ -13,9 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -25,11 +22,6 @@ public class SignupController {
     private final SignupService signupService;
     private final PasswordService passwordService;
 
-    @RequestMapping(method = RequestMethod.GET, value = "")
-    //@GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers());
-    }
 
     @GetMapping("/checkUserName")
     public boolean userNameExists(@RequestParam String userName) {

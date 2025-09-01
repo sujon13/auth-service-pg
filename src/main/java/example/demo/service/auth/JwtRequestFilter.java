@@ -72,6 +72,14 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             return;
         }
 
+        String path = request.getRequestURI();
+
+        // Skip JWT for API key-protected endpoint
+        if (path.equals("/api/v1/users")) {
+            chain.doFilter(request, response);
+            return;
+        }
+
         String jwt = extractJwtToken(request);
         if (jwt == null) {
             log.info("Token found from the cookie");

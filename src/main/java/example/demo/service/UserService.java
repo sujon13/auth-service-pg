@@ -36,8 +36,9 @@ public class UserService {
     private final UserUtil userUtil;
 
     //@PreAuthorize("hasRole('ADMIN')")
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getUsers(List<String> userNames) {
+        List<User> users = userRepository.findAllByUserNameIn(userNames);
+        return buildUserResponseList(users);
     }
 
     public List<User> findAllVerifiedUsers() {
@@ -205,6 +206,7 @@ public class UserService {
         return UserResponse.builder()
                 .userId(user.getId())
                 .userName(user.getUsername())
+                .name(user.getName())
                 .email(user.getEmail())
                 .build();
     }
@@ -213,6 +215,12 @@ public class UserService {
         final String userName = userUtil.getUserName();
         final User user = getUserByUserName(userName).orElseThrow();
         return buildUserResponse(user);
+    }
+
+    public List<UserResponse> buildUserResponseList(List<User> users) {
+        return users.stream()
+                .map(this::buildUserResponse)
+                .toList();
     }
 
     private void convertUserFromRequest(User user, UserRequest request) {

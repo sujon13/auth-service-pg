@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authorization.AuthorizationDecision;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -24,8 +25,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private static final String PREFIX = "/api/v1";
-
-
+    private final ApiKeyChecker apiKeyChecker;
     private final JwtRequestFilter jwtRequestFilter;
 
     private static final List<String> PUBLIC_ENDPOINTS = List.of(
@@ -68,7 +68,12 @@ public class SecurityConfig {
                         //.requestMatchers(PREFIX + "/signup", "/error").permitAll()
                         //.requestMatchers(HttpMethod.GET, PREFIX + "/signup/checkUserName").permitAll()
                         //.requestMatchers(HttpMethod.POST, PREFIX + "/signup/send-otp", PREFIX + "/signup/verify-otp").permitAll()
-                        .requestMatchers(HttpMethod.GET, PREFIX + "/users").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, PREFIX + "/users")
+                            .access((authentication, context) ->
+                                        apiKeyChecker.check(context.getRequest())
+                                                ? new AuthorizationDecision(true)
+                                                : new AuthorizationDecision(false)
+                                )
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users").hasAnyRole("ADMIN", "USER")
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify")
                             .hasRole("ADMIN")

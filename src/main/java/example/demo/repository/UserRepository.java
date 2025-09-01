@@ -20,4 +20,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
     @Query("SELECT u FROM User u WHERE u.isEmailVerified = true and u.isVerified = true")
     List<User> findAllVerifiedUsers();
+
+    List<User> findAllByUserNameIn(List<String> userNames);
 }

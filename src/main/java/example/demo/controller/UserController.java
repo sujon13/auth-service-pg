@@ -24,9 +24,8 @@ public class UserController {
     private final UserUtil userUtil;
 
     @GetMapping("")
-    //@GetMapping("/users")
-    public ResponseEntity<List<User>> getUsers() {
-        return ResponseEntity.ok(userService.getUsers());
+    public ResponseEntity<List<UserResponse>> getUsers(@RequestParam List<String> userNames) {
+        return ResponseEntity.ok(userService.getUsers(userNames));
     }
 
     @GetMapping("/me")
