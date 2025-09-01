@@ -273,12 +273,15 @@ public class UserService {
                 .build();
     }
 
-    public List<UserDropdown> getUserDropdowns() {
+    public List<UserDropdown> getUserDropdowns(boolean excludingSelf) {
         final String selfUserName = userUtil.getUserName();
-        Predicate<User> isAdminOrSelf = user -> user.getUsername().equals(Constants.ADMIN) || user.getUsername().equals(selfUserName);
+        Predicate<User> isAdmin = user -> user.getUsername().equals(Constants.ADMIN);
+        Predicate<User> isSelf = user -> user.getUsername().equals(selfUserName);
+
         return findAllVerifiedUsers()
                 .stream()
-                .filter(user -> !isAdminOrSelf.test(user))
+                .filter(user -> !isAdmin.test(user))
+                .filter(user -> excludingSelf ? !isSelf.test(user) : true)
                 .map(this::buildDropdown)
                 .toList();
     }
