@@ -60,7 +60,6 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()// Allow all OPTIONS requests (preflight)
 
-                        //.requestMatchers("/hello", "/secure").permitAll()
                         //.requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll()
                         .requestMatchers(PREFIX + "/logout").authenticated()
 
@@ -76,10 +75,8 @@ public class SecurityConfig {
                                                 : new AuthorizationDecision(false)
                                 )
                         .requestMatchers(HttpMethod.POST, PREFIX + "/users").hasAnyRole("ADMIN", "USER")
-                        .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify")
-                            .hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, PREFIX + "/users/*/assignRole", PREFIX + "/users/*/verify").hasRole("ADMIN")
                         .requestMatchers(PREFIX + "/users/me", PREFIX + "/users/dropdown").authenticated()
-                        .requestMatchers(PREFIX + "/users/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/test").hasAnyRole("USER")
                         .anyRequest().authenticated()  // Secure other endpoints
                 )

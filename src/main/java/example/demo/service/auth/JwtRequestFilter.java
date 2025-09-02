@@ -2,7 +2,6 @@ package example.demo.service.auth;
 
 import example.demo.config.SecurityConfig;
 import example.demo.service.UserService;
-import example.demo.signup.model.User;
 import example.demo.util.Constants;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -16,6 +15,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -26,7 +26,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @Component
@@ -62,11 +61,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 .anyMatch(pattern -> requestPath.matches(pattern.replace("**", ".*")));
     }
 
+    private boolean isOptionsRequest(final HttpServletRequest request) {
+        return HttpMethod.OPTIONS.matches(request.getMethod());
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
 
-        if (isPublicEndpoint(request)) {
+        if (isPublicEndpoint(request) || isOptionsRequest(request)) {
             // Skip token validation for public endpoints
             chain.doFilter(request, response);
             return;
@@ -105,17 +108,13 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
         }
 
-        final Optional<User> optionalUser = userService.getUserByUserName(username);
-        if (optionalUser.isPresent() && SecurityContextHolder.getContext().getAuthentication() == null) {
-            final User user = optionalUser.get();
-
-            if (jwtUtil.validateToken(jwt, user.getUsername())) {
-                List<? extends GrantedAuthority> authorities = jwtUtil.extractRoles(jwt);
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-                        user, null, authorities);
-                authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
+        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            // skip recheck user if it is altered meanwhile
+            List<? extends GrantedAuthority> authorities = jwtUtil.extractRoles(jwt);
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    username, null, authorities);
+            authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         }
         chain.doFilter(request, response);
     }
