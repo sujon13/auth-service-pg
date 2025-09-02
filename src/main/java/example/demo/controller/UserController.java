@@ -92,9 +92,8 @@ public class UserController {
     }
 
     @GetMapping("/dropdown")
-    public List<UserDropdown> getVerifiedUsers(
-            @RequestParam(value = "excludingSelf", required = false, defaultValue = "true") boolean excludingSelf) {
-        return userService.getUserDropdowns(excludingSelf);
+    public List<UserDropdown> getVerifiedUsers() {
+        return userService.getUserDropdowns();
     }
 
 }
