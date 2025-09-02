@@ -58,6 +58,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers(PUBLIC_ENDPOINTS.toArray(new String[0])).permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()// Allow all OPTIONS requests (preflight)
 
                         //.requestMatchers("/hello", "/secure").permitAll()
                         //.requestMatchers(PREFIX + "/authenticate", PREFIX + "/password").permitAll()

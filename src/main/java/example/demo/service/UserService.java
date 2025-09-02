@@ -211,10 +211,13 @@ public class UserService {
                 .build();
     }
 
+    // only for currently logged in user
     public UserResponse buildUserResponse() {
         final String userName = userUtil.getUserName();
         final User user = getUserByUserName(userName).orElseThrow();
-        return buildUserResponse(user);
+        UserResponse userResponse = buildUserResponse(user);
+        userResponse.setRoles(userUtil.getUserRoles());
+        return userResponse;
     }
 
     public List<UserResponse> buildUserResponseList(List<User> users) {

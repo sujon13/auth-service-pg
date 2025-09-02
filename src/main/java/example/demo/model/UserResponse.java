@@ -1,8 +1,11 @@
 package example.demo.model;
 
+import example.demo.enums.RoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,4 +15,6 @@ public class UserResponse {
     private String userName;
     private String name;
     private String email;
+
+    private List<RoleEnum> roles;
 }
