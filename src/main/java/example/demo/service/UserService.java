@@ -320,20 +320,30 @@ public class UserService {
     }
 
     // util
-    private UserDropdown buildDropdown(final User user) {
+    private UserDropdown buildDropdown(final User user, List<UserOfficeResponse> userOfficeResponses) {
+        UserOfficeResponse userOfficeResponse = userOfficeResponses.getFirst();
         return UserDropdown.builder()
                 .username(user.getUsername())
                 .name(user.getName())
+                .designation(userOfficeResponse.getDesignation())
+                .office(userOfficeResponse.getOffice())
+                .company(userOfficeResponse.getCompany())
                 .build();
     }
 
     public List<UserDropdown> getUserDropdowns() {
         Predicate<User> isAdmin = user -> user.getUsername().equals(Constants.ADMIN);
 
-        return findAllVerifiedUsers()
-                .stream()
+        List<User> verifiedUsersExceptAdmin = findAllVerifiedUsers().stream()
                 .filter(user -> !isAdmin.test(user))
-                .map(this::buildDropdown)
+                .toList();
+        var userIdToOfficeResponseMap = getUserIdToOfficeResponseMap(verifiedUsersExceptAdmin);
+
+        return verifiedUsersExceptAdmin.stream()
+                .map(user -> buildDropdown(
+                        user,
+                        userIdToOfficeResponseMap.getOrDefault(user.getId(), List.of())
+                ))
                 .toList();
     }
 

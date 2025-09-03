@@ -10,4 +10,7 @@ import lombok.Setter;
 public class UserDropdown {
     private String username;
     private String name;
+    private String designation;
+    private String office;
+    private String company;
 }
