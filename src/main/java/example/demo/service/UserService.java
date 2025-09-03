@@ -1,11 +1,9 @@
 package example.demo.service;
 
+import example.demo.enums.RoleEnum;
 import example.demo.exception.EntryAlreadyExistsException;
 import example.demo.exception.NotFoundException;
-import example.demo.model.Role;
-import example.demo.model.UserDropdown;
-import example.demo.model.UserRequest;
-import example.demo.model.UserResponse;
+import example.demo.model.*;
 import example.demo.oauth.model.OAuthUser;
 import example.demo.oauth.model.UserNameRequest;
 import example.demo.repository.UserRepository;
@@ -21,8 +19,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,8 +30,8 @@ import java.util.function.Predicate;
 @Transactional(readOnly = true)
 public class UserService {
     private final UserRepository userRepository;
-    private final RoleService roleService;
     private final UserRoleService userRoleService;
+    private final UserOfficeService userOfficeService;
     private final PasswordService passwordService;
     private final UserUtil userUtil;
 
@@ -175,9 +175,9 @@ public class UserService {
 
     public List<String> getRolesOfUser(final int userId) {
         List<Integer> roleIds = userRoleService.retrieveRoleIds(userId);
-        return roleService.retrieveRoles(roleIds)
-                .stream()
-                .map(Role::getName)
+        return roleIds.stream()
+                .map(RoleEnum::getByValue)
+                .map(RoleEnum::getName)
                 .map(role -> "ROLE_" + role)
                 .toList();
     }
@@ -202,27 +202,70 @@ public class UserService {
         verifyUser(user);
     }
 
-    public UserResponse buildUserResponse(final User user) {
+    public UserResponse buildUserResponse(
+            final User user,
+            List<RoleEnum> roles,
+            List<UserOfficeResponse> userOfficeResponses
+    ) {
+        List<RoleResponse> roleResponses = roles.stream()
+                .map(role -> new RoleResponse(role.getValue(), role.getName(), role.getDisplayName()))
+                .toList();
+
         return UserResponse.builder()
                 .userId(user.getId())
                 .userName(user.getUsername())
                 .name(user.getName())
                 .email(user.getEmail())
+                .roles(roleResponses)
+                .userOffices(userOfficeResponses)
                 .build();
     }
 
-    // only for currently logged in user
-    public UserResponse buildUserResponse() {
+    public UserResponse getLoggedInUserResponse() {
         final String userName = userUtil.getUserName();
         final User user = getUserByUserName(userName).orElseThrow();
-        UserResponse userResponse = buildUserResponse(user);
-        userResponse.setRoles(userUtil.getUserRoles());
-        return userResponse;
+
+        List<RoleEnum> roleEnums = userUtil.getUserRoles();
+        var userIdToOfficeResponseMap = getUserIdToOfficeResponseMap(List.of(user));
+        List<UserOfficeResponse> userOfficeResponses = userIdToOfficeResponseMap.getOrDefault(user.getId(), List.of());
+        return buildUserResponse(user, userUtil.getUserRoles(), userOfficeResponses);
+    }
+
+    private Map<Integer, List<UserOfficeResponse>> getUserIdToOfficeResponseMap(List<User> users) {
+        List<Integer> userIds = users.stream()
+                .map(User::getId)
+                .toList();
+        return userOfficeService.getUserOfficeResponses(userIds)
+                .stream()
+                .collect(Collectors.groupingBy(UserOfficeResponse::getUserId));
+    }
+
+    private Map<Integer, List<RoleEnum>> getUserIdToRoleEnumMap(List<User> users) {
+        List<Integer> userIds = users.stream()
+                .map(User::getId)
+                .toList();
+        List<UserRole> roles = userRoleService.retrieveRoles(userIds);
+        return roles.stream()
+                .collect(
+                        Collectors.groupingBy(
+                                UserRole::getUserId,
+                                Collectors.mapping(
+                                        userRole -> RoleEnum.getByValue(userRole.getRoleId()),
+                                        Collectors.toList()
+                                )
+                        )
+                );
     }
 
     public List<UserResponse> buildUserResponseList(List<User> users) {
+        Map<Integer, List<UserOfficeResponse>> userIdToOfficeResponseMap = getUserIdToOfficeResponseMap(users);
+        Map<Integer, List<RoleEnum>> userIdToRoleEnumMap = getUserIdToRoleEnumMap(users);
+
         return users.stream()
-                .map(this::buildUserResponse)
+                .map(user -> buildUserResponse(user,
+                        userIdToRoleEnumMap.get(user.getId()),
+                        userIdToOfficeResponseMap.get(user.getId()))
+                )
                 .toList();
     }
 

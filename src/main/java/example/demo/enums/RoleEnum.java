@@ -2,25 +2,46 @@ package example.demo.enums;
 
 import lombok.Getter;
 
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 
 @Getter
 public enum RoleEnum {
-    ADMIN(1),
-    SCADA_SE(2),
-    SCADA_XEN(3),
-    SCADA_SDE(4),
-    SCADA_AE(5),
-    SCADA_SAE(6),
-    NOD_XEN(7),
-    NOD_SDE(8),
-    NOD_AE(9),
-    NOD_SAE(10),
-    GE(11);
+    ADMIN(1, "Admin"),
+    SCADA_SE(2, "SCADA SE"),
+    SMD_XEN(3, "SMD XEN"),
+    SMD_SDE(4, "SMD SDE"),
+    SMD_AE(5, "SMD AE"),
+    SMD_SAE(6, "SMD SAE"),
+    NOD_XEN(7, "NOD XEN"),
+    NOD_SDE(8, "NOD SDE"),
+    NOD_AE(9, "NOD AE"),
+    NOD_SAE(10, "NOD SAE"),
+    CONTRACTOR(11, "Contractor");
 
-    private final int id;
+    private static final Map<Integer, RoleEnum> mapByValue;
 
-    RoleEnum(int id) {
-        this.id = id;
+    static {
+        mapByValue = Stream.of(RoleEnum.values())
+                .collect(Collectors.toMap(e -> e.value, e -> e));
+    }
+
+    private final int value;
+    private final String displayName;
+
+    RoleEnum(int value, String displayName) {
+        this.value = value;
+        this.displayName = displayName;
+    }
+
+    public static RoleEnum getByValue(Integer value) {
+        return value == null ? null : mapByValue.get(value);
+    }
+
+    public String getName() {
+        return this.name();
     }
 }
 

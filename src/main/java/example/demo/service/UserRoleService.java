@@ -29,16 +29,22 @@ public class UserRoleService {
                 .toList();
     }
 
+    public List<UserRole> retrieveRoles(List<Integer> userIds) {
+        return userRoleRepository.getAllByUserIdIn(userIds)
+                .stream()
+                .toList();
+    }
+
     private boolean isRoleExists(final int userId, final RoleEnum role) {
         return retrieveUserRoles(userId)
                 .stream()
-                .anyMatch(userRole -> userRole.getRoleId() == role.getId());
+                .anyMatch(userRole -> userRole.getRoleId() == role.getValue());
     }
 
     private UserRole createUserRole(final int userId, final RoleEnum role) {
         final UserRole userRole = new UserRole();
         userRole.setUserId(userId);
-        userRole.setRoleId(role.getId());
+        userRole.setRoleId(role.getValue());
         return userRole;
     }
 
