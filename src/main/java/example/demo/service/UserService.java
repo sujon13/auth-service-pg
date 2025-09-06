@@ -225,7 +225,6 @@ public class UserService {
         final String userName = userUtil.getUserName();
         final User user = getUserByUserName(userName).orElseThrow();
 
-        List<RoleEnum> roleEnums = userUtil.getUserRoles();
         var userIdToOfficeResponseMap = getUserIdToOfficeResponseMap(List.of(user));
         List<UserOfficeResponse> userOfficeResponses = userIdToOfficeResponseMap.getOrDefault(user.getId(), List.of());
         return buildUserResponse(user, userUtil.getUserRoles(), userOfficeResponses);
@@ -321,18 +320,21 @@ public class UserService {
 
     // util
     private UserDropdown buildDropdown(final User user, List<UserOfficeResponse> userOfficeResponses) {
-        UserOfficeResponse userOfficeResponse = userOfficeResponses.getFirst();
+        Optional<UserOfficeResponse> userOffice = userOfficeResponses.isEmpty()
+                ? Optional.empty()
+                : Optional.of(userOfficeResponses.getFirst());
+
         return UserDropdown.builder()
                 .username(user.getUsername())
                 .name(user.getName())
-                .designation(userOfficeResponse.getDesignation())
-                .office(userOfficeResponse.getOffice())
-                .company(userOfficeResponse.getCompany())
+                .designation(userOffice.map(UserOfficeResponse::getDesignation).orElse(null))
+                .office(userOffice.map(UserOfficeResponse::getOffice).orElse(null))
+                .company(userOffice.map(UserOfficeResponse::getCompany).orElse(null))
                 .build();
     }
 
     public List<UserDropdown> getUserDropdowns() {
-        Predicate<User> isAdmin = user -> user.getUsername().equals(Constants.ADMIN);
+        Predicate<User> isAdmin = user -> Constants.ADMIN.equals(user.getUsername());
 
         List<User> verifiedUsersExceptAdmin = findAllVerifiedUsers().stream()
                 .filter(user -> !isAdmin.test(user))

@@ -104,6 +104,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
                 handleJwtException(response, "JWT Token has expired", e.getMessage());
             }
             if (username == null) {
+                log.error("Username not found in JWT Token");
                 return;
             }
         }
