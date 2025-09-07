@@ -4,9 +4,7 @@ import example.demo.config.SecurityConfig;
 import example.demo.service.UserService;
 import example.demo.util.Constants;
 import io.jsonwebtoken.ExpiredJwtException;
-import io.jsonwebtoken.MalformedJwtException;
-import io.jsonwebtoken.security.SecurityException;
-import io.jsonwebtoken.security.SignatureException;
+import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -35,7 +33,7 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     private final UserService userService;
     private final JwtUtil jwtUtil;
 
-    private String extractJwtToken(HttpServletRequest request) {
+    private String extractJwtTokenFromHeader(HttpServletRequest request) {
         final String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             return authorizationHeader.substring(7);
@@ -65,6 +63,15 @@ public class JwtRequestFilter extends OncePerRequestFilter {
         return HttpMethod.OPTIONS.matches(request.getMethod());
     }
 
+    private String extractJwtToken(HttpServletRequest request) {
+        String jwt = extractJwtTokenFromHeader(request);
+        if (jwt == null) {
+            log.debug("Token found from the cookie");
+            jwt = extractJwtTokenFromCookie(request);
+        }
+        return jwt;
+    }
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
             throws ServletException, IOException {
@@ -85,31 +92,26 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
         String jwt = extractJwtToken(request);
         if (jwt == null) {
-            log.info("Token found from the cookie");
-            jwt = extractJwtTokenFromCookie(request);
+            handleJwtException(response, "JWT Token not found", "JWT Token not found");
+            return;
         }
 
-        String username = null;
-
-        if (jwt != null) {
-            try {
-                username = jwtUtil.extractUsername(jwt);
-            } catch (MalformedJwtException e) {
-                handleJwtException(response, "Invalid JWT Token", e.getMessage());
-            } catch (SignatureException e) {
-                handleJwtException(response, "Invalid JWT Signature", e.getMessage());
-            } catch (SecurityException e) {
-                handleJwtException(response, "Invalid JWT Security", e.getMessage());
-            } catch (ExpiredJwtException e) {
-                handleJwtException(response, "JWT Token has expired", e.getMessage());
-            }
+        String username;
+        try {
+            username = jwtUtil.extractUsername(jwt);
             if (username == null) {
-                log.error("Username not found in JWT Token");
+                handleJwtException(response, "Username not found in JWT Token", "Username not found in JWT Token");
                 return;
             }
+        } catch (ExpiredJwtException e) {
+            handleJwtException(response, "JWT Token has expired", e.getMessage());
+            return;
+        } catch (JwtException e) { // all other JWT errors
+            handleJwtException(response, "Invalid JWT", e.getMessage());
+            return;
         }
 
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (SecurityContextHolder.getContext().getAuthentication() == null) {
             // skip recheck user if it is altered meanwhile
             List<? extends GrantedAuthority> authorities = jwtUtil.extractRoles(jwt);
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
