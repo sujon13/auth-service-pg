@@ -20,6 +20,6 @@ public class Constants {
 
     public static final String INTERNAL_API_KEY_HEADER = "X-INTERNAL-API-KEY";
 
-    public static final int TOKEN_EXPIRATION_TIME_IN_DAYS = 1;
-    public static final int COOKIE_EXPIRATION_TIME_IN_DAYS = 1;
+    public static final int TOKEN_EXPIRATION_TIME_IN_DAYS = 30;
+    public static final int COOKIE_EXPIRATION_TIME_IN_DAYS = 30;
 }
