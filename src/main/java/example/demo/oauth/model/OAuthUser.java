@@ -2,13 +2,14 @@ package example.demo.oauth.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import example.demo.signup.enums.AccountType;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
-@AllArgsConstructor
 @ToString
 public class OAuthUser {
     @JsonProperty("sub")

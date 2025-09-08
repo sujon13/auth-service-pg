@@ -7,7 +7,9 @@ import example.demo.signup.enums.AccountType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -16,7 +18,6 @@ import java.util.Collection;
 
 @Setter
 @Getter
-@Builder
 @Entity
 @Table(name = "users", indexes = {
         @Index(name = "idx_users_user_name", columnList = "user_name"),
@@ -24,7 +25,6 @@ import java.util.Collection;
         //@Index(name = "idx_users_account_id", columnList = "account_id"),
 })
 @NoArgsConstructor
-@AllArgsConstructor
 //@EntityListeners(AuditingEntityListener.class)
 public class User implements UserDetails {
 

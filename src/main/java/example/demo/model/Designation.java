@@ -2,7 +2,6 @@ package example.demo.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotEmpty;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "designations")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Designation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

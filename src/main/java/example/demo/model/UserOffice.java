@@ -1,7 +1,6 @@
 package example.demo.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -14,7 +13,6 @@ import lombok.Setter;
         @Index(name = "idx_user_offices_user_id", columnList = "user_id"),
 })
 @NoArgsConstructor
-@AllArgsConstructor
 public class UserOffice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -2,7 +2,6 @@ package example.demo.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,7 +11,6 @@ import lombok.Setter;
 @Entity
 @Table(name = "user_role")
 @NoArgsConstructor
-@AllArgsConstructor
 //@EntityListeners(AuditingEntityListener.class)
 public class UserRole {
     @Id

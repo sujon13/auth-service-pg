@@ -1,7 +1,6 @@
 package example.demo.signup.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -13,7 +12,6 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "otps")
 @NoArgsConstructor
-@AllArgsConstructor
 public class Otp {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
