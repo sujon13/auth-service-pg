@@ -91,7 +91,8 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        config.addAllowedOrigin("http://localhost:5173");
+        //config.addAllowedOrigin("https://tasktrackerpg.netlify.app");
+        config.setAllowedOrigins(List.of("http://localhost:5173", "http://103.9.187.246:5173"));
         config.addAllowedMethod(CorsConfiguration.ALL);
         config.addAllowedHeader(CorsConfiguration.ALL);
         config.addExposedHeader("Location"); // Expose the Location header
