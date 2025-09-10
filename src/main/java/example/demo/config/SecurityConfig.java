@@ -13,6 +13,9 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import java.util.List;
 
@@ -85,11 +88,10 @@ public class SecurityConfig {
         return http.build();
     }
 
-    /*@Bean
+    @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
-        //config.addAllowedOrigin("https://tasktrackerpg.netlify.app");
-        config.setAllowedOrigins(List.of("http://localhost:5173", "http://103.9.187.246:5173"));
+        config.addAllowedOrigin("http://localhost:5173");
         config.addAllowedMethod(CorsConfiguration.ALL);
         config.addAllowedHeader(CorsConfiguration.ALL);
         config.addExposedHeader("Location"); // Expose the Location header
@@ -99,5 +101,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", config);
 
         return new CorsFilter(source);
-    }*/
+    }
 }
