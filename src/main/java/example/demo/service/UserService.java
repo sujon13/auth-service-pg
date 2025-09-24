@@ -18,6 +18,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -334,9 +335,13 @@ public class UserService {
     }
 
     public List<UserDropdown> getUserDropdowns() {
-        Predicate<User> isAdmin = user -> Constants.ADMIN.equals(user.getUsername());
+        String me = userUtil.getUserName();
+        List<User> verifiedUsers = findAllVerifiedUsers().stream()
+                .sorted(Comparator.comparing(u -> !u.getUsername().equals(me)))
+                .toList();
 
-        List<User> verifiedUsersExceptAdmin = findAllVerifiedUsers().stream()
+        Predicate<User> isAdmin = user -> Constants.ADMIN.equals(user.getUsername());
+        List<User> verifiedUsersExceptAdmin = verifiedUsers.stream()
                 .filter(user -> !isAdmin.test(user))
                 .toList();
         var userIdToOfficeResponseMap = getUserIdToOfficeResponseMap(verifiedUsersExceptAdmin);
