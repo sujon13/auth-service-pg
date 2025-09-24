@@ -19,7 +19,9 @@ public enum RoleEnum {
     NOD_SDE(8, "NOD SDE"),
     NOD_AE(9, "NOD AE"),
     NOD_SAE(10, "NOD SAE"),
-    CONTRACTOR(11, "Contractor");
+    CONTRACTOR(11, "Contractor"),
+    IMD(12, "IMD"),
+    EMD(13, "EMD");
 
     private static final Map<Integer, RoleEnum> mapByValue;
 
