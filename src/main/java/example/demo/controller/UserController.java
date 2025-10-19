@@ -92,8 +92,8 @@ public class UserController {
     }
 
     @GetMapping("/dropdown")
-    public List<UserDropdown> getVerifiedUsers() {
-        return userService.getUserDropdowns();
+    public List<UserDropdown> getVerifiedUsers(@RequestParam(value = "assignee", defaultValue = "false") boolean assignee) {
+        return userService.getUserDropdowns(assignee);
     }
 
 }

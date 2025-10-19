@@ -218,6 +218,7 @@ public class UserService {
                 .name(user.getName())
                 .email(user.getEmail())
                 .roles(roleResponses)
+                .roleEnum(roles.getFirst())
                 .userOffices(userOfficeResponses)
                 .build();
     }
@@ -320,21 +321,21 @@ public class UserService {
     }
 
     // util
-    private UserDropdown buildDropdown(final User user, List<UserOfficeResponse> userOfficeResponses) {
-        Optional<UserOfficeResponse> userOffice = userOfficeResponses.isEmpty()
+    private UserDropdown buildDropdown(final UserResponse userResponse) {
+        Optional<UserOfficeResponse> userOffice = Util.isNullOrEmpty(userResponse.getUserOffices())
                 ? Optional.empty()
-                : Optional.of(userOfficeResponses.getFirst());
+                : Optional.of(userResponse.getUserOffices().getFirst());
 
         return UserDropdown.builder()
-                .username(user.getUsername())
-                .name(user.getName())
+                .username(userResponse.getUserName())
+                .name(userResponse.getName())
                 .designation(userOffice.map(UserOfficeResponse::getDesignation).orElse(null))
                 .office(userOffice.map(UserOfficeResponse::getOffice).orElse(null))
                 .company(userOffice.map(UserOfficeResponse::getCompany).orElse(null))
                 .build();
     }
 
-    public List<UserDropdown> getUserDropdowns() {
+    public List<UserDropdown> getUserDropdowns(boolean assignee) {
         String me = userUtil.getUserName();
         List<User> verifiedUsers = findAllVerifiedUsers().stream()
                 .sorted(Comparator.comparing(u -> !u.getUsername().equals(me)))
@@ -344,13 +345,16 @@ public class UserService {
         List<User> verifiedUsersExceptAdmin = verifiedUsers.stream()
                 .filter(user -> !isAdmin.test(user))
                 .toList();
-        var userIdToOfficeResponseMap = getUserIdToOfficeResponseMap(verifiedUsersExceptAdmin);
 
-        return verifiedUsersExceptAdmin.stream()
-                .map(user -> buildDropdown(
-                        user,
-                        userIdToOfficeResponseMap.getOrDefault(user.getId(), List.of())
-                ))
+        List<UserResponse> userResponses = buildUserResponseList(verifiedUsersExceptAdmin);
+        Predicate<UserResponse> isAssignable = userResponse -> {
+            if (!assignee)return true;
+            return List.of(RoleEnum.SMD_SDE, RoleEnum.SMD_AE, RoleEnum.CONTRACTOR).contains(userResponse.getRoleEnum());
+        };
+
+        return userResponses.stream()
+                .filter(isAssignable)
+                .map(this::buildDropdown)
                 .toList();
     }
 

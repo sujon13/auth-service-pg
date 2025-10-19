@@ -1,5 +1,6 @@
 package example.demo.model;
 
+import example.demo.enums.RoleEnum;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
@@ -16,5 +17,6 @@ public class UserResponse {
     private String email;
 
     private List<RoleResponse> roles;
+    private RoleEnum roleEnum;
     private List<UserOfficeResponse> userOffices;
 }

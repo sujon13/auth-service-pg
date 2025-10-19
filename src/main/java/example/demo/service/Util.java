@@ -1,5 +1,7 @@
 package example.demo.service;
 
+import java.util.List;
+
 public class Util {
     int count = 0;
 
@@ -18,5 +20,9 @@ public class Util {
 
     public static boolean isEmail(String input) {
         return input.contains("@");
+    }
+
+    public static boolean isNullOrEmpty(List<?> list) {
+        return list == null || list.isEmpty();
     }
 }
