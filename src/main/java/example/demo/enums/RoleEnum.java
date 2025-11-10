@@ -24,7 +24,8 @@ public enum RoleEnum {
     EMD(13, "EMD"),
     CNST_XEN(14, "CNST XEN"),
     CNST_SDE(15, "CNST SDE"),
-    CNST_AE(16, "CNST AE");
+    CNST_AE(16, "CNST AE"),
+    SCADA_AE(17, "SCADA AE");
 
     private static final Map<Integer, RoleEnum> mapByValue;
 
