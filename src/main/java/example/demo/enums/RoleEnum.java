@@ -21,7 +21,10 @@ public enum RoleEnum {
     NOD_SAE(10, "NOD SAE"),
     CONTRACTOR(11, "Contractor"),
     IMD(12, "IMD"),
-    EMD(13, "EMD");
+    EMD(13, "EMD"),
+    CNST_XEN(14, "CNST XEN"),
+    CNST_SDE(15, "CNST SDE"),
+    CNST_AE(16, "CNST AE");
 
     private static final Map<Integer, RoleEnum> mapByValue;
 
